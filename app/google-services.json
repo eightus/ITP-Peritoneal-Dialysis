@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "419498110986",
+    "project_id": "sit-itp-pdbuddy",
+    "storage_bucket": "sit-itp-pdbuddy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419498110986:android:791afc15af77d78789eff3",
+        "android_client_info": {
+          "package_name": "com.itp.pdbuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrP6pgwb4z6rVENWUw7cexynhlNMVVVao"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
