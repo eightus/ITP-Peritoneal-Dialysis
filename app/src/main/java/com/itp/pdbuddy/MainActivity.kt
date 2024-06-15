@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +39,8 @@ import androidx.navigation.compose.rememberNavController
 import com.itp.pdbuddy.navigation.AppNavigation
 import com.itp.pdbuddy.navigation.NavItem
 import com.itp.pdbuddy.navigation.NavigationConfig.navItems
-import com.itp.pdbuddy.ui.screen.HomeScreen
+import com.itp.pdbuddy.ui.screen.LoginScreen
+import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
 import com.itp.pdbuddy.ui.theme.getScreenWidth
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,40 +77,68 @@ fun MainScreen(navController: NavHostController) {
     LaunchedEffect(currentRoute) {
         drawerState.close()
     }
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(getScreenWidth() * 2 / 3)
+
+    when (currentRoute) {
+        "register" -> {
+            ScaffoldWithTopBar(
+                appbarTitle = appbarTitle,
+                navController = navController,
+                drawerState = drawerState,
+                scope = scope,
+                showBurger = false
+            )
+        }
+        "splash" -> {
+            SplashScreen(navController = navController)
+        }
+        "login" -> {
+            LoginScreen(navController = navController)
+        }
+        else -> {
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet(
+                        modifier = Modifier.width(getScreenWidth() * 2 / 3)
+                    ) {
+                        Text(
+                            text = "Menu",
+                            color = Color.Blue,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        HorizontalDivider()
+                        DrawerBody(items, navController)
+                    }
+                },
+                gesturesEnabled = true // swipe to open
             ) {
-                Text(text = "SIT Mobile", color = Color.Blue, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(16.dp))
-                HorizontalDivider()
-                DrawerBody(items, navController)
+                ScaffoldWithTopBar(
+                    appbarTitle = appbarTitle,
+                    navController = navController,
+                    drawerState = drawerState,
+                    scope = scope
+                )
             }
-        },
-        gesturesEnabled = true // swipe to open
-    ) {
-        ScaffoldWithTopBar(
-            appbarTitle = appbarTitle,
-            navController = navController,
-            drawerState = drawerState,
-            scope = scope
-        )
+        }
     }
-
 }
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldWithTopBar(appbarTitle: String, navController: NavHostController, drawerState: DrawerState, scope: CoroutineScope, showBurger: Boolean = true) {
+fun ScaffoldWithTopBar(
+    appbarTitle: String,
+    navController: NavHostController,
+    drawerState: DrawerState,
+    scope: CoroutineScope,
+    showBurger: Boolean = true
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(appbarTitle) },
-                navigationIcon =  {
-                    if (showBurger){
+                navigationIcon = {
+                    if (showBurger) {
                         IconButton(onClick = {
                             scope.launch {
                                 drawerState.apply { if (isClosed) open() else close() }
@@ -128,7 +156,7 @@ fun ScaffoldWithTopBar(appbarTitle: String, navController: NavHostController, dr
         },
     ) { innerPadding ->
         // Screen content
-        AppNavigation(navController = navController, modifier = Modifier.padding(innerPadding) )
+        AppNavigation(navController = navController, modifier = Modifier.padding(innerPadding))
     }
 }
 
