@@ -6,46 +6,36 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TextSnippet
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.itp.pdbuddy.navigation.AppNavigation
-import com.itp.pdbuddy.navigation.NavItem
-import com.itp.pdbuddy.navigation.NavigationConfig.navItems
 import com.itp.pdbuddy.ui.screen.LoginScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
-import com.itp.pdbuddy.ui.theme.getScreenWidth
+import com.itp.pdbuddy.utils.navigate
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -68,58 +58,32 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val items = navItems
+    val currentRoute by navController.currentBackStackEntryAsState()
     val appbarTitle = "PDBuddy"
 
-    LaunchedEffect(currentRoute) {
-        drawerState.close()
-    }
-
-    when (currentRoute) {
+    when (currentRoute?.destination?.route) {
         "register" -> {
             ScaffoldWithTopBar(
                 appbarTitle = appbarTitle,
                 navController = navController,
-                drawerState = drawerState,
-                scope = scope,
-                showBurger = false
+                showBottomBar = false
             )
         }
+
         "splash" -> {
             SplashScreen(navController = navController)
         }
+
         "login" -> {
             LoginScreen(navController = navController)
         }
+
         else -> {
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                drawerContent = {
-                    ModalDrawerSheet(
-                        modifier = Modifier.width(getScreenWidth() * 2 / 3)
-                    ) {
-                        Text(
-                            text = "Menu",
-                            color = Color.Blue,
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        HorizontalDivider()
-                        DrawerBody(items, navController)
-                    }
-                },
-                gesturesEnabled = true // swipe to open
-            ) {
-                ScaffoldWithTopBar(
-                    appbarTitle = appbarTitle,
-                    navController = navController,
-                    drawerState = drawerState,
-                    scope = scope
-                )
-            }
+            ScaffoldWithTopBar(
+                appbarTitle = appbarTitle,
+                navController = navController,
+                showBottomBar = true
+            )
         }
     }
 }
@@ -129,22 +93,21 @@ fun MainScreen(navController: NavHostController) {
 fun ScaffoldWithTopBar(
     appbarTitle: String,
     navController: NavHostController,
-    drawerState: DrawerState,
-    scope: CoroutineScope,
-    showBurger: Boolean = true
+    showBottomBar: Boolean
 ) {
+    val canNavigateBack = navController.previousBackStackEntry != null
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(appbarTitle) },
                 navigationIcon = {
-                    if (showBurger) {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.apply { if (isClosed) open() else close() }
-                            }
-                        }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Back")
+                    if (canNavigateBack) {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+
                         }
                     }
                 },
@@ -154,31 +117,49 @@ fun ScaffoldWithTopBar(
                 ),
             )
         },
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavigationBar(navController = navController)
+            }
+        }
     ) { innerPadding ->
-        // Screen content
         AppNavigation(navController = navController, modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
-fun DrawerBody(items: List<NavItem>, navController: NavController) {
-    items.forEach { item ->
-        NavigationDrawerItem(
-            label = { Text(text = item.title) },
-            icon = { item.icon?.let { Icon(imageVector = it, contentDescription = item.title) } },
+fun BottomNavigationBar(navController: NavController) {
+    NavigationBar {
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            label = { Text("Home") },
             selected = false,
             onClick = {
-                navController.navigate(item.route)
+                navigate(navController, "home", true)
             }
         )
-        HorizontalDivider()
+        NavigationBarItem(
+            icon = { Icon(Icons.AutoMirrored.Filled.TextSnippet, contentDescription = "Record") },
+            label = { Text("Record") },
+            selected = false,
+            onClick = {
+                navigate(navController, "record", true)
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
+            label = { Text("Profile") },
+            selected = false,
+            onClick = {
+                navigate(navController, "profile", true)
+            }
+        )
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainScreenPreview() {
     PDBuddyTheme {
         MainScreen(rememberNavController())
     }

@@ -15,6 +15,8 @@ val LightPastelBlue = Color(0xFFF5FAFF) // Light pastel blue background (match t
 val DarkBlue = Color(0xFF2C3E50) // Dark blue text (used for main text)
 val LightBlue = Color(0xFF4A90E2) // Lighter blue text (used for subtitle text)
 val HeartBlue = Color(0xFF36C6FF) // Heart shape color
+val LightGray = Color(0xFFF0F0F0) // Light gray surface for the light theme
+val StrongTextColor = Color(0xFF00796B) // Strong text color (teal)
 
 val DarkBackground = Color(0xFF121212) // Dark background
 val DarkSurface = Color(0xFF1E1E1E) // Dark surface
