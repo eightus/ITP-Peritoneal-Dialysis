@@ -54,7 +54,7 @@ object NavigationConfig {
 
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
-    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "home", modifier = modifier) {
 
         NavigationConfig.navItems.forEach { navItem ->
             composable(navItem.route) { navItem.screen(navController) }
