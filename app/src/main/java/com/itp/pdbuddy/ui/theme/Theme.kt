@@ -11,6 +11,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
@@ -24,7 +27,7 @@ private val DarkColorScheme = darkColorScheme(
     onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = Color.White,
-    onSurface = Color.White
+    onSurface = Color.White ,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -32,13 +35,21 @@ private val LightColorScheme = lightColorScheme(
     secondary = LightBlue,
     tertiary = HeartBlue,
     background = LightPastelBlue,
-    surface = LightPastelBlue,
+    surface = LightGray,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = DarkBlue,
-    onSurface = DarkBlue
+    onSurface = DarkBlue,
 )
+
+data class CustomColors(val strongTextColor: Color)
+
+val LocalCustomColors = staticCompositionLocalOf {
+    CustomColors(
+        strongTextColor = StrongTextColor
+    )
+}
 
 @Composable
 fun PDBuddyTheme(
@@ -46,19 +57,25 @@ fun PDBuddyTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val customColors = CustomColors(
+        strongTextColor = StrongTextColor
+    )
+
+    CompositionLocalProvider(LocalCustomColors provides customColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+}
+
+object PDBuddyTheme {
+    val customColors: CustomColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalCustomColors.current
 }

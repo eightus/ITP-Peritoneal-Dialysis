@@ -19,4 +19,12 @@ class AuthRepository @Inject constructor(
     suspend fun isLoggedIn(): Result<Boolean> {
         return authDataSource.isLoggedIn()
     }
+
+    suspend fun getUsername(): Result<String?> {
+        return authDataSource.getUsername()
+    }
+
+    suspend fun updateDisplayName(displayName: String): Result<Boolean> {
+        return authDataSource.updateDisplayName(displayName)
+    }
 }
