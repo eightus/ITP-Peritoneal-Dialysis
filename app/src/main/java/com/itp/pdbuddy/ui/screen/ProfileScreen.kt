@@ -8,6 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
 import com.itp.pdbuddy.ui.viewmodel.ProfileViewModel
+import com.itp.pdbuddy.utils.navigate
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
@@ -16,7 +17,7 @@ fun ProfileScreen(navController: NavHostController) {
 
     Column {
 
-        Button(onClick = { navController.navigate("home") }) {
+        Button(onClick = { navigate(navController, "home", requireSaveState = false) }) {
             Text("Go to Home Screen")
         }
 
