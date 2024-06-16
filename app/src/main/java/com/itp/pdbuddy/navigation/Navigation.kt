@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SmartScreen
+import androidx.compose.material.icons.twotone.Inventory2
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -17,9 +18,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
 import com.itp.pdbuddy.ui.screen.HomeScreen
+import com.itp.pdbuddy.ui.screen.PastSuppliesScreen
 import com.itp.pdbuddy.ui.screen.ProfileScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
+import com.itp.pdbuddy.ui.screen.SuppliesScreen
 
 
 data class NavItem(
@@ -82,9 +86,37 @@ object NavigationConfig {
                     title = "Training",
                     icon = Icons.AutoMirrored.Filled.MenuBook,
                     screen = { navController -> HomeScreen(navController = navController) }
+                ),
+                NavItem(
+                    route = "resourcesTraining",
+                    title = "Training",
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    screen = { navController -> HomeScreen(navController = navController) }
+
                 )
             )
+        ),
+        NavItem(
+            route = "supplies",
+            title = "Supplies",
+            icon = Icons.TwoTone.Inventory2,
+            screen = { navController -> SuppliesScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "currentSupplies",
+            title = "Current Supplies",
+            screen = { navController -> CurrentSuppliesScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "pastSupplies",
+            title = "Past Supplies",
+            screen = { navController -> PastSuppliesScreen(navController = navController) }
+
         )
+
+
     )
 }
 
