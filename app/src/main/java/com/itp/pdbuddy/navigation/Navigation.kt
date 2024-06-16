@@ -20,7 +20,9 @@ import androidx.navigation.navigation
 import com.itp.pdbuddy.ui.screen.HomeScreen
 import com.itp.pdbuddy.ui.screen.ProfileScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
-
+import com.itp.pdbuddy.ui.screen.RecordScreen
+import com.itp.pdbuddy.ui.screen.ManualRecordScreen
+import com.itp.pdbuddy.ui.screen.AutoRecordScreen
 
 data class NavItem(
     val route: String,
@@ -56,6 +58,24 @@ object NavigationConfig {
             title = "Profile",
             icon = Icons.Default.Person,
             screen = { navController -> ProfileScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "record",
+            title = "record",
+            icon = Icons.Default.Person,
+            screen = { navController -> RecordScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "manualrecord",
+            title = "manualrecord",
+            icon = Icons.Default.Person,
+            screen = { navController -> ManualRecordScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "autorecord",
+            title = "autorecord",
+            icon = Icons.Default.Person,
+            screen = { navController -> AutoRecordScreen(navController = navController) }
         ),
         NavItem(
             route = "resources",
@@ -103,6 +123,10 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
+
+//    NavHost(navController = navController, startDestination = "home", modifier = modifier) {
+//        addNavItems(navController, NavigationConfig.navItems)
+//    }
     NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
