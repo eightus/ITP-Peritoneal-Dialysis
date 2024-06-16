@@ -1,5 +1,6 @@
 package com.itp.pdbuddy.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
+import com.itp.pdbuddy.ui.viewmodel.NetworkViewModel
 import com.itp.pdbuddy.utils.Result
 
 @Composable
@@ -43,6 +45,8 @@ fun HomeScreen(navController: NavController) {
     val username by authViewModel.username.collectAsState()
     authViewModel.fetchUsername()
     HomeScreenContent(navController = navController, username = username)
+
+
 }
 
 @Composable
