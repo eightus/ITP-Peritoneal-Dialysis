@@ -53,9 +53,29 @@ android {
 }
 
 dependencies {
+
+    // Default
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging.ktx)
     ksp(libs.hilt.android.compiler)
     ksp(libs.dagger.compiler)
 
@@ -76,6 +96,10 @@ dependencies {
 
     // Firebase Firestore
     implementation(libs.firebase.firestore)
+
+    // Firebase Cloud Messaging (For Cloud Messaging)
+    implementation(libs.google.firebase.analytics)
+    implementation(libs.firebase.messaging)
 
     // Extended Icons
     implementation(libs.androidx.material.icons.extended)
@@ -106,20 +130,5 @@ dependencies {
     androidTestImplementation(libs.androidx.rules)
     androidTestImplementation(libs.androidx.navigation.testing)
 
-    // Default
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+
 }
