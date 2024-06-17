@@ -335,36 +335,36 @@ private fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
     val collectionRef = db.collection("CurrentSupplies")
     val userId = getCurrentUserId()
 
-            supplies.forEach { supply ->
-                if (supply.checked) {
-                    val itemData = hashMapOf(
-                        "name" to supply.name,
-                        "quantity" to supply.quantity,
-                        "userId" to userId
-                    )
+    supplies.forEach { supply ->
+        if (supply.checked) {
+            val itemData = hashMapOf(
+                "name" to supply.name,
+                "quantity" to supply.quantity,
+                "userId" to userId
+            )
 
-                    collectionRef
-                        .whereEqualTo("name", supply.name)
-                        .whereEqualTo("userId", userId)
-                        .get()
-                        .addOnSuccessListener { documents ->
-                            if (documents.isEmpty) {
-                                collectionRef.add(itemData)
-                                    .addOnSuccessListener { documentReference ->
-                                        Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.w(TAG, "Error adding document", e)
-                                    }
-                            } else {
-                                Log.d(TAG, "Supply already exists in Firestore")
+            collectionRef
+                .whereEqualTo("name", supply.name)
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        collectionRef.add(itemData)
+                            .addOnSuccessListener { documentReference ->
+                                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
                             }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w(TAG, "Error checking document", e)
-                        }
+                            .addOnFailureListener { e ->
+                                Log.w(TAG, "Error adding document", e)
+                            }
+                    } else {
+                        Log.d(TAG, "Supply already exists in Firestore")
+                    }
                 }
-            }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "Error checking document", e)
+                }
+        }
+    }
 }
 private fun getCurrentUserId(): String? {
     return FirebaseAuth.getInstance().currentUser?.uid
