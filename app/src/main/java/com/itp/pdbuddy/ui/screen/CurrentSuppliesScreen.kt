@@ -3,6 +3,8 @@ package com.itp.pdbuddy.ui.screen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -106,24 +108,26 @@ fun AddSuppliesDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = "Add Supplies") },
         text = {
-            Column {
-                suppliesList.forEach { supply ->
-                    val isSelected = selectedSupplies.contains(supply)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = isSelected,
-                            onCheckedChange = {
-                                if (isSelected) {
-                                    selectedSupplies.remove(supply)
-                                } else {
-                                    selectedSupplies.add(supply)
+            Box(modifier = Modifier.heightIn(max = 400.dp)) {
+                LazyColumn {
+                    items(suppliesList) { supply ->
+                        val isSelected = selectedSupplies.contains(supply)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = {
+                                    if (isSelected) {
+                                        selectedSupplies.remove(supply)
+                                    } else {
+                                        selectedSupplies.add(supply)
+                                    }
                                 }
-                            }
-                        )
-                        Text(text = supply, modifier = Modifier.padding(start = 8.dp))
+                            )
+                            Text(text = supply, modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                 }
             }
