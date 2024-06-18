@@ -14,8 +14,9 @@ import javax.inject.Inject
 import com.itp.pdbuddy.ui.screen.SupplyItem
 
 @HiltViewModel
-class CurrentSuppliesViewModel @Inject constructor
-    (private val suppliesRepository: SuppliesRepository) : ViewModel() {
+class CurrentSuppliesViewModel @Inject constructor(
+    private val suppliesRepository: SuppliesRepository
+) : ViewModel() {
 
     private val _suppliesList = MutableStateFlow<List<String>>(emptyList())
     val suppliesList: StateFlow<List<String>> = _suppliesList
@@ -41,6 +42,14 @@ class CurrentSuppliesViewModel @Inject constructor
         }
     }
 
+    fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
+        suppliesRepository.addSuppliesToFirestore(supplies)
+        // Update the local state with the new supplies
+        val updatedList = _selectedSupplies.value.toMutableList()
+        updatedList.addAll(supplies)
+        _selectedSupplies.value = updatedList
+    }
+
     fun updateSupplyQuantity(item: SupplyItem, newQuantity: Int) {
         suppliesRepository.updateSupplyQuantityInFirestore(item, newQuantity) {
             val updatedList = _selectedSupplies.value.toMutableList()
@@ -52,11 +61,12 @@ class CurrentSuppliesViewModel @Inject constructor
         }
     }
 
-    fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
-        suppliesRepository.addSuppliesToFirestore(supplies)
-
-        val updatedList = _selectedSupplies.value.toMutableList()
-        updatedList.addAll(supplies)
-        _selectedSupplies.value = updatedList
+    fun deleteSupplyFromFirestore(supplyItem: SupplyItem) {
+        suppliesRepository.deleteSupplyFromFirestore(supplyItem) {
+            val updatedList = _selectedSupplies.value.toMutableList()
+            updatedList.remove(supplyItem)
+            _selectedSupplies.value = updatedList
+        }
     }
 }
+

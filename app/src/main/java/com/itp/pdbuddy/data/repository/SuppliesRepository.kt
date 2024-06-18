@@ -64,26 +64,35 @@ class SuppliesRepository @Inject constructor(
 
     fun updateSupplyQuantityInFirestore(item: SupplyItem, newQuantity: Int, onSuccess: () -> Unit) {
         val userId = getCurrentUserId()
-        val query = db.collection("CurrentSupplies")
-            .whereEqualTo("name", item.name)
-            .whereEqualTo("userId", userId)
+        if (userId != null) {
+            val query = db.collection("CurrentSupplies")
+                .whereEqualTo("name", item.name)
+                .whereEqualTo("userId", userId)
 
-        query.get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    document.reference.update("quantity", newQuantity)
-                        .addOnSuccessListener {
-                            onSuccess()
+            query.get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        for (document in documents) {
+                            document.reference.update("quantity", newQuantity)
+                                .addOnSuccessListener {
+                                    onSuccess()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w(TAG, "Error updating document", e)
+                                }
                         }
-                        .addOnFailureListener { e ->
-                            Log.w(TAG, "Error updating document", e)
-                        }
+                    } else {
+                        Log.w(TAG, "No matching documents found")
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error getting documents: ", e)
-            }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "Error getting documents: ", e)
+                }
+        } else {
+            Log.e(TAG, "User ID is null, cannot update supply quantity.")
+        }
     }
+
 
     fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
         val collectionRef = db.collection("CurrentSupplies")
@@ -94,7 +103,7 @@ class SuppliesRepository @Inject constructor(
                 val itemData = hashMapOf(
                     "name" to supply.name,
                     "quantity" to supply.quantity,
-                    "username" to userId
+                    "userId" to userId
                 )
 
                 collectionRef
@@ -120,4 +129,32 @@ class SuppliesRepository @Inject constructor(
             }
         }
     }
+
+    fun deleteSupplyFromFirestore(supplyItem: SupplyItem, onSuccess: () -> Unit) {
+        val userId = getCurrentUserId()
+
+        if (userId != null) {
+            db.collection("CurrentSupplies")
+                .whereEqualTo("name", supplyItem.name)
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        document.reference.delete()
+                            .addOnSuccessListener {
+                                onSuccess()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w(TAG, "Error deleting document", e)
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "Error getting documents: ", e)
+                }
+        } else {
+            Log.e(TAG, "User ID is null, cannot delete supply item.")
+        }
+    }
+
 }
