@@ -47,27 +47,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CurrentSuppliesScreen(navController: NavHostController) {
+fun CurrentSuppliesScreen(navController: NavHostController,
+                          csviewModel: CurrentSuppliesViewModel = hiltViewModel()) {
 
+
+    val suppliesList by csviewModel.suppliesList.collectAsState()
+    val selectedSupplies by csviewModel.selectedSupplies.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    var suppliesList by remember { mutableStateOf<List<String>>(emptyList()) }
-    val selectedSupplies = remember { mutableStateListOf<SupplyItem>() }
 
-    LaunchedEffect(key1 = true) {
-        fetchSuppliesList { list ->
-            suppliesList = list
-        }
-        fetchUserSupplies { list ->
-            selectedSupplies.clear()
-            selectedSupplies.addAll(list)
-        }
-    }
-
-    Scaffold (
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { values ->
         Column(
@@ -104,15 +97,9 @@ fun CurrentSuppliesScreen(navController: NavHostController) {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(selectedSupplies) { item ->
-                    SupplyCard(item = item) { supplyItem, newQuantity ->
-                        updateSupplyQuantityInFirestore(supplyItem, newQuantity) {
-                            // Update selectedSupplies locally
-                            val index = selectedSupplies.indexOfFirst { it.name == supplyItem.name }
-                            if (index != -1) {
-                                selectedSupplies[index] = supplyItem.copy(quantity = newQuantity)
-                            }
-                        }
-                    }
+                    SupplyCard(item = item, onUpdateQuantity = { supplyItem, newQuantity ->
+                        csviewModel.updateSupplyQuantity(supplyItem, newQuantity)
+                    })
                 }
             }
         }
@@ -122,8 +109,8 @@ fun CurrentSuppliesScreen(navController: NavHostController) {
             suppliesList = suppliesList,
             selectedSupplies = selectedSupplies,
             onDismissRequest = { showDialog = false },
-            onConfirm = {
-                addSuppliesToFirestore(selectedSupplies)
+            onConfirm = { newSelectedSupplies ->
+                csviewModel.addSuppliesToFirestore(newSelectedSupplies)
                 showDialog = false
             }
         )
@@ -131,7 +118,8 @@ fun CurrentSuppliesScreen(navController: NavHostController) {
 }
 
 @Composable
-fun SupplyCard(item: SupplyItem, onUpdateQuantity: (SupplyItem, Int) -> Unit) {
+fun SupplyCard(item: SupplyItem,
+               onUpdateQuantity: (SupplyItem, Int) -> Unit) {
     var showRestockDialog by remember { mutableStateOf(false) }
 
     if (showRestockDialog) {
@@ -144,6 +132,7 @@ fun SupplyCard(item: SupplyItem, onUpdateQuantity: (SupplyItem, Int) -> Unit) {
             }
         )
     }
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,37 +209,14 @@ fun UpdateQuantityDialog(
     )
 }
 
-private fun updateSupplyQuantityInFirestore(item: SupplyItem, newQuantity: Int, onSuccess: () -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    val userId = getCurrentUserId()
 
-    val query = db.collection("CurrentSupplies")
-        .whereEqualTo("name", item.name)
-        .whereEqualTo("userId", userId)
-
-    query.get()
-        .addOnSuccessListener { documents ->
-            for (document in documents) {
-                document.reference.update("quantity", newQuantity)
-                    .addOnSuccessListener {
-                        onSuccess()
-                    }
-                    .addOnFailureListener { e ->
-                        Log.w(TAG, "Error updating document", e)
-                    }
-            }
-        }
-        .addOnFailureListener { e ->
-            Log.w(TAG, "Error getting documents: ", e)
-        }
-}
 
 @Composable
 fun AddSuppliesDialog(
     suppliesList: List<String>,
-    selectedSupplies: MutableList<SupplyItem>,
+    selectedSupplies: List<SupplyItem>,
     onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: (List<SupplyItem>) -> Unit
 ) {
     val uncheckedSuppliesList = suppliesList.filter { supply ->
         selectedSupplies.none { it.name == supply && it.checked }
@@ -294,12 +260,8 @@ fun AddSuppliesDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    tempSelectedSupplies.filter { it.checked }.forEach { item ->
-                        if (!selectedSupplies.contains(item)) {
-                            selectedSupplies.add(item)
-                        }
-                    }
-                    onConfirm()
+                    val newSelectedSupplies = tempSelectedSupplies.filter { it.checked }.toList()
+                    onConfirm(newSelectedSupplies)
                 }
             ) {
                 Text("Add")
@@ -315,88 +277,9 @@ fun AddSuppliesDialog(
     )
 }
 
-private suspend fun fetchSuppliesList(updateList: (List<String>) -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    try {
-        val querySnapshot = db.collection("supplies").get().await()
-        val list = querySnapshot.documents.map { doc ->
-            doc.getString("name") ?: ""
-        }
-// Update the suppliesList with the fetched data
-        updateList(list)
-    } catch (e: Exception) {
-// Handle any errors here
-        e.printStackTrace()
-    }
-}
 
-private fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
-    val db = FirebaseFirestore.getInstance()
-    val collectionRef = db.collection("CurrentSupplies")
-    val userId = getCurrentUserId()
 
-    supplies.forEach { supply ->
-        if (supply.checked) {
-            val itemData = hashMapOf(
-                "name" to supply.name,
-                "quantity" to supply.quantity,
-                "userId" to userId
-            )
 
-            collectionRef
-                .whereEqualTo("name", supply.name)
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener { documents ->
-                    if (documents.isEmpty) {
-                        collectionRef.add(itemData)
-                            .addOnSuccessListener { documentReference ->
-                                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w(TAG, "Error adding document", e)
-                            }
-                    } else {
-                        Log.d(TAG, "Supply already exists in Firestore")
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.w(TAG, "Error checking document", e)
-                }
-        }
-    }
-}
-private fun getCurrentUserId(): String? {
-    return FirebaseAuth.getInstance().currentUser?.uid
-}
-
-private suspend fun fetchUserSupplies(updateList: (List<SupplyItem>) -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    val userId = getCurrentUserId()
-
-            if (userId != null) {
-                try {
-                    val querySnapshot = db.collection("CurrentSupplies")
-                        .whereEqualTo("userId", userId)
-                        .get().await()
-
-                    val list = querySnapshot.documents.mapNotNull { doc ->
-                        val name = doc.getString("name")
-                        val quantity = doc.getLong("quantity")?.toInt()
-                        if (name != null && quantity != null) {
-                            SupplyItem(name, quantity, checked = true, userId = userId)
-                        } else {
-                            null
-                        }
-                    }
-                    updateList(list)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            } else {
-                updateList(emptyList())
-            }
-}
 data class SupplyItem(
     val name: String,
     var quantity: Int = 0,

@@ -24,6 +24,7 @@ import com.itp.pdbuddy.ui.screen.PastSuppliesScreen
 import com.itp.pdbuddy.ui.screen.ProfileScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
+import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 
 
 data class NavItem(
