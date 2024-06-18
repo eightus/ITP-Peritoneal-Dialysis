@@ -43,29 +43,35 @@ class CurrentSuppliesViewModel @Inject constructor(
     }
 
     fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
-        suppliesRepository.addSuppliesToFirestore(supplies)
-        // Update the local state with the new supplies
-        val updatedList = _selectedSupplies.value.toMutableList()
-        updatedList.addAll(supplies)
-        _selectedSupplies.value = updatedList
+        viewModelScope.launch {
+            suppliesRepository.addSuppliesToFirestore(supplies)
+            // Update the local state with the new supplies
+            val updatedList = _selectedSupplies.value.toMutableList()
+            updatedList.addAll(supplies)
+            _selectedSupplies.value = updatedList
+        }
     }
 
     fun updateSupplyQuantity(item: SupplyItem, newQuantity: Int) {
-        suppliesRepository.updateSupplyQuantityInFirestore(item, newQuantity) {
-            val updatedList = _selectedSupplies.value.toMutableList()
-            val index = updatedList.indexOfFirst { it.name == item.name }
-            if (index != -1) {
-                updatedList[index] = item.copy(quantity = newQuantity)
-                _selectedSupplies.value = updatedList
+        viewModelScope.launch {
+            suppliesRepository.updateSupplyQuantityInFirestore(item, newQuantity) {
+                val updatedList = _selectedSupplies.value.toMutableList()
+                val index = updatedList.indexOfFirst { it.name == item.name }
+                if (index != -1) {
+                    updatedList[index] = item.copy(quantity = newQuantity)
+                    _selectedSupplies.value = updatedList
+                }
             }
         }
     }
 
     fun deleteSupplyFromFirestore(supplyItem: SupplyItem) {
-        suppliesRepository.deleteSupplyFromFirestore(supplyItem) {
-            val updatedList = _selectedSupplies.value.toMutableList()
-            updatedList.remove(supplyItem)
-            _selectedSupplies.value = updatedList
+        viewModelScope.launch {
+            suppliesRepository.deleteSupplyFromFirestore(supplyItem) {
+                val updatedList = _selectedSupplies.value.toMutableList()
+                updatedList.remove(supplyItem)
+                _selectedSupplies.value = updatedList
+            }
         }
     }
 }

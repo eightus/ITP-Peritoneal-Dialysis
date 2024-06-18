@@ -19,8 +19,19 @@ class SuppliesRepository @Inject constructor(
     } */
     private val db = FirebaseFirestore.getInstance()
 
-    private fun getCurrentUserId(): String? {
-        return FirebaseAuth.getInstance().currentUser?.uid
+    private suspend fun getCurrentUsername(): String? {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        return if (userId != null) {
+            try {
+                val documentSnapshot = db.collection("users").document(userId).get().await()
+                documentSnapshot.getString("username")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        } else {
+            null
+        }
     }
 
     suspend fun fetchSuppliesList(): List<String> {
@@ -37,18 +48,18 @@ class SuppliesRepository @Inject constructor(
     }
 
     suspend fun fetchUserSupplies(): List<SupplyItem> {
-        val userId = getCurrentUserId()
-        return if (userId != null) {
+        val username = getCurrentUsername()
+        return if (username != null) {
             try {
                 val querySnapshot = db.collection("CurrentSupplies")
-                    .whereEqualTo("userId", userId)
+                    .whereEqualTo("userId", username)
                     .get().await()
 
                 querySnapshot.documents.mapNotNull { doc ->
                     val name = doc.getString("name")
                     val quantity = doc.getLong("quantity")?.toInt()
                     if (name != null && quantity != null) {
-                        SupplyItem(name, quantity, checked = true, userId = userId)
+                        SupplyItem(name, quantity, checked = true, userId = username)
                     } else {
                         null
                     }
@@ -62,12 +73,12 @@ class SuppliesRepository @Inject constructor(
         }
     }
 
-    fun updateSupplyQuantityInFirestore(item: SupplyItem, newQuantity: Int, onSuccess: () -> Unit) {
-        val userId = getCurrentUserId()
-        if (userId != null) {
+    suspend fun updateSupplyQuantityInFirestore(item: SupplyItem, newQuantity: Int, onSuccess: () -> Unit) {
+        val username = getCurrentUsername()
+        if (username != null) {
             val query = db.collection("CurrentSupplies")
                 .whereEqualTo("name", item.name)
-                .whereEqualTo("userId", userId)
+                .whereEqualTo("username", username)
 
             query.get()
                 .addOnSuccessListener { documents ->
@@ -94,21 +105,21 @@ class SuppliesRepository @Inject constructor(
     }
 
 
-    fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
+    suspend fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
         val collectionRef = db.collection("CurrentSupplies")
-        val userId = getCurrentUserId()
+        val username = getCurrentUsername()
 
         supplies.forEach { supply ->
             if (supply.checked) {
                 val itemData = hashMapOf(
                     "name" to supply.name,
                     "quantity" to supply.quantity,
-                    "userId" to userId
+                    "username" to username
                 )
 
                 collectionRef
                     .whereEqualTo("name", supply.name)
-                    .whereEqualTo("userId", userId)
+                    .whereEqualTo("username", username)
                     .get()
                     .addOnSuccessListener { documents ->
                         if (documents.isEmpty) {
@@ -130,13 +141,13 @@ class SuppliesRepository @Inject constructor(
         }
     }
 
-    fun deleteSupplyFromFirestore(supplyItem: SupplyItem, onSuccess: () -> Unit) {
-        val userId = getCurrentUserId()
+    suspend fun deleteSupplyFromFirestore(supplyItem: SupplyItem, onSuccess: () -> Unit) {
+        val username = getCurrentUsername()
 
-        if (userId != null) {
+        if (username != null) {
             db.collection("CurrentSupplies")
                 .whereEqualTo("name", supplyItem.name)
-                .whereEqualTo("userId", userId)
+                .whereEqualTo("username", username)
                 .get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
