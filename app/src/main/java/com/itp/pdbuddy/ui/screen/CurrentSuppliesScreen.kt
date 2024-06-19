@@ -27,16 +27,17 @@ fun CurrentSuppliesScreen(
 ) {
     val suppliesList by csviewModel.suppliesList.collectAsState()
     val selectedSupplies by csviewModel.selectedSupplies.collectAsState()
+    val cartItems by csviewModel.cartItems.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-    ) { values ->
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(values)
+                .padding(it)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -74,12 +75,15 @@ fun CurrentSuppliesScreen(
                         },
                         onDeleteSupply = { supplyItem ->
                             csviewModel.deleteSupplyFromFirestore(supplyItem)
+                        },
+                        onRestock = { supplyItem, quantity ->
+                            csviewModel.addToCart(SupplyItem(supplyItem.name, quantity, checked = true, userId = supplyItem.userId))
                         }
                     )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Button( onClick = { navController.navigate("CartSupplies")}) {
+            Button(onClick = { navController.navigate("CartSupplies") }) {
                 Text("Cart")
             }
         }
@@ -122,10 +126,13 @@ val supplyImageMap = mapOf(
 fun SupplyCard(
     item: SupplyItem,
     onUpdateQuantity: (SupplyItem, Int) -> Unit,
-    onDeleteSupply: (SupplyItem) -> Unit
+    onDeleteSupply: (SupplyItem) -> Unit,
+    onRestock: (SupplyItem, Int) -> Unit
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var editedQuantity by remember { mutableStateOf(item.quantity.toString()) }
+    var showRestockDialog by remember { mutableStateOf(false) }
+    var restockQuantity by remember { mutableStateOf(0) }
 
     if (showEditDialog) {
         UpdateQuantityDialog(
@@ -138,6 +145,18 @@ fun SupplyCard(
             }
         )
     }
+
+    if (showRestockDialog) {
+        RestockDialog(
+            onDismissRequest = { showRestockDialog = false },
+            onConfirm = { quantity ->
+                restockQuantity = quantity
+                onRestock(item, restockQuantity)
+                showRestockDialog = false
+            }
+        )
+    }
+
     val imageRes = supplyImageMap[normalizeName(item.name)] ?: R.drawable.splash_heart
 
     ElevatedCard(
@@ -160,15 +179,6 @@ fun SupplyCard(
                     contentDescription = item.name,
                     modifier = Modifier.size(100.dp)
                 )
-                /*val normalizedImageUrl = normalizeName(item.imageUrl)
-                val imageRes = supplyImageMap
-                if (imageRes != null) {
-                    Image(
-                        painter = painterResource(id = imageRes),
-                        contentDescription = item.name,
-                        modifier = Modifier.size(100.dp)
-                    )
-                }*/
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = item.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.weight(1f))
@@ -194,9 +204,10 @@ fun SupplyCard(
                     Text("Edit")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { /* Handle restock functionality here */ }) {
+                Button(onClick = { showRestockDialog = true }) {
                     Text("Restock")
                 }
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
@@ -270,7 +281,6 @@ fun AddSuppliesDialog(
                         val item = tempSelectedSupplies.find { it.name == supply }
                             ?: SupplyItem(
                                 name = supply,
-                                //imageUrl = normalizeName(supply)
                             )
                         val isChecked = remember { mutableStateOf(item.checked) }
                         Row(
@@ -317,10 +327,52 @@ fun AddSuppliesDialog(
     )
 }
 
+@Composable
+fun RestockDialog(
+    onDismissRequest: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var restockQuantity by remember { mutableStateOf("1") }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = "Restock Quantity") },
+        text = {
+            Column {
+                Text(text = "Enter quantity to restock:")
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = restockQuantity,
+                    onValueChange = { restockQuantity = it },
+                    label = { Text("Quantity") },
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val quantity = restockQuantity.toIntOrNull() ?: 0
+                    onConfirm(quantity)
+                }
+            ) {
+                Text("Add to Cart")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismissRequest
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
 data class SupplyItem(
     val name: String,
     var quantity: Int = 0,
     var checked: Boolean = false,
     val userId: String? = null
-    //val imageUrl: String
 )
+

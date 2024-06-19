@@ -1,18 +1,14 @@
 package com.itp.pdbuddy.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.itp.pdbuddy.data.repository.SuppliesRepository
-import com.itp.pdbuddy.utils.Result
+import com.itp.pdbuddy.ui.screen.SupplyItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.itp.pdbuddy.ui.screen.SupplyItem
 
 @HiltViewModel
 class CurrentSuppliesViewModel @Inject constructor(
@@ -25,12 +21,13 @@ class CurrentSuppliesViewModel @Inject constructor(
     private val _selectedSupplies = MutableStateFlow<List<SupplyItem>>(emptyList())
     val selectedSupplies: StateFlow<List<SupplyItem>> = _selectedSupplies
 
-    private val _restockSupplies = MutableStateFlow<List<SupplyItem>>(emptyList())
-    val restockSupplies: StateFlow<List<SupplyItem>> = _restockSupplies.asStateFlow()
+    private val _cartItems = MutableStateFlow<List<SupplyItem>>(emptyList())
+    val cartItems: StateFlow<List<SupplyItem>> = _cartItems
 
     init {
         fetchSupplies()
         fetchUserSupplies()
+        fetchCartItems() // Fetch cart items initially
     }
 
     private fun fetchSupplies() {
@@ -46,6 +43,13 @@ class CurrentSuppliesViewModel @Inject constructor(
         }
     }
 
+    private fun fetchCartItems() {
+        viewModelScope.launch {
+            val cartItems = suppliesRepository.fetchCartItems()
+            _cartItems.value = cartItems
+        }
+    }
+
     fun addSuppliesToFirestore(supplies: List<SupplyItem>) {
         viewModelScope.launch {
             suppliesRepository.addSuppliesToFirestore(supplies)
@@ -56,15 +60,10 @@ class CurrentSuppliesViewModel @Inject constructor(
         }
     }
 
-    fun updateSupplyQuantity(item: SupplyItem, newQuantity: Int) {
+    fun updateSupplyQuantity(supplyItem: SupplyItem, newQuantity: Int) {
         viewModelScope.launch {
-            suppliesRepository.updateSupplyQuantityInFirestore(item, newQuantity) {
-                val updatedList = _selectedSupplies.value.toMutableList()
-                val index = updatedList.indexOfFirst { it.name == item.name }
-                if (index != -1) {
-                    updatedList[index] = item.copy(quantity = newQuantity)
-                    _selectedSupplies.value = updatedList
-                }
+            suppliesRepository.updateSupplyQuantityInFirestore(supplyItem, newQuantity) {
+                // Update local state after successful update if needed
             }
         }
     }
@@ -72,13 +71,29 @@ class CurrentSuppliesViewModel @Inject constructor(
     fun deleteSupplyFromFirestore(supplyItem: SupplyItem) {
         viewModelScope.launch {
             suppliesRepository.deleteSupplyFromFirestore(supplyItem) {
-                val updatedList = _selectedSupplies.value.toMutableList()
-                updatedList.remove(supplyItem)
-                _selectedSupplies.value = updatedList
+                // Update local state after successful deletion if needed
+            }
+        }
+    }
+
+    fun addToCart(supplyItem: SupplyItem) {
+        viewModelScope.launch {
+            suppliesRepository.addToCart(supplyItem)
+            // Update local state with the new cart item
+            val updatedCartList = _cartItems.value.toMutableList()
+            updatedCartList.add(supplyItem)
+            _cartItems.value = updatedCartList
+        }
+    }
+
+    fun removeFromCart(supplyItem: SupplyItem) {
+        viewModelScope.launch {
+            suppliesRepository.removeFromCart(supplyItem) {
+                // Update local state after successful removal if needed
+                val updatedCartList = _cartItems.value.toMutableList()
+                updatedCartList.remove(supplyItem)
+                _cartItems.value = updatedCartList
             }
         }
     }
 }
-
-
-

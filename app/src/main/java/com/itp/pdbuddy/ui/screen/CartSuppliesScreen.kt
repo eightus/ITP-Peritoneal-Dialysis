@@ -38,3 +38,4 @@ fun CartSuppliesScreen(navController: NavHostController) {
         // Add your content here
     }
 }
+
