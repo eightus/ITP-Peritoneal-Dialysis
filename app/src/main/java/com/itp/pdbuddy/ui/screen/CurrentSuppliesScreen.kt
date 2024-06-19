@@ -77,7 +77,7 @@ fun CurrentSuppliesScreen(
                             csviewModel.deleteSupplyFromFirestore(supplyItem)
                         },
                         onRestock = { supplyItem, quantity ->
-                            csviewModel.addToCart(SupplyItem(supplyItem.name, quantity, checked = true, userId = supplyItem.userId))
+                            csviewModel.addToCart(supplyItem.copy(quantity = quantity))
                         }
                     )
                 }
@@ -373,6 +373,8 @@ data class SupplyItem(
     val name: String,
     var quantity: Int = 0,
     var checked: Boolean = false,
+    var price: Double = 0.0,
     val userId: String? = null
 )
+
 

@@ -22,6 +22,7 @@ import com.itp.pdbuddy.ui.screen.CartSuppliesScreen
 import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
 import com.itp.pdbuddy.ui.screen.HomeScreen
 import com.itp.pdbuddy.ui.screen.PastSuppliesScreen
+import com.itp.pdbuddy.ui.screen.PaymentScreen
 import com.itp.pdbuddy.ui.screen.ProfileScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
@@ -121,6 +122,12 @@ object NavigationConfig {
             route = "cartSupplies",
             title = "Cart Supplies",
             screen = { navController -> CartSuppliesScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "payment",
+            title = "Payment",
+            screen = { navController -> PaymentScreen(navController = navController) }
 
         )
 

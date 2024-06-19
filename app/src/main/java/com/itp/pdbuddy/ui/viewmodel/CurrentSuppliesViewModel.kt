@@ -1,5 +1,7 @@
 package com.itp.pdbuddy.ui.viewmodel
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itp.pdbuddy.data.repository.SuppliesRepository
@@ -63,7 +65,12 @@ class CurrentSuppliesViewModel @Inject constructor(
     fun updateSupplyQuantity(supplyItem: SupplyItem, newQuantity: Int) {
         viewModelScope.launch {
             suppliesRepository.updateSupplyQuantityInFirestore(supplyItem, newQuantity) {
-                // Update local state after successful update if needed
+                val updatedList = _selectedSupplies.value.toMutableList()
+                val index = updatedList.indexOfFirst { it.name == supplyItem.name }
+                if (index != -1) {
+                    updatedList[index] = supplyItem.copy(quantity = newQuantity)
+                    _selectedSupplies.value = updatedList
+                }
             }
         }
     }
@@ -71,18 +78,24 @@ class CurrentSuppliesViewModel @Inject constructor(
     fun deleteSupplyFromFirestore(supplyItem: SupplyItem) {
         viewModelScope.launch {
             suppliesRepository.deleteSupplyFromFirestore(supplyItem) {
-                // Update local state after successful deletion if needed
+                val updatedList = _selectedSupplies.value.toMutableList()
+                updatedList.remove(supplyItem)
+                _selectedSupplies.value = updatedList
             }
         }
     }
 
     fun addToCart(supplyItem: SupplyItem) {
         viewModelScope.launch {
-            suppliesRepository.addToCart(supplyItem)
+            val itemPrice = suppliesRepository.getItemPrice(supplyItem.name)
+
+            Log.d(TAG, "Price for ${supplyItem.name} before adding to cart: $itemPrice")
             // Update local state with the new cart item
             val updatedCartList = _cartItems.value.toMutableList()
-            updatedCartList.add(supplyItem)
+            updatedCartList.add(supplyItem.copy(price = itemPrice))
             _cartItems.value = updatedCartList
+
+            suppliesRepository.addToCart(supplyItem.copy(price = itemPrice))
         }
     }
 
@@ -96,4 +109,13 @@ class CurrentSuppliesViewModel @Inject constructor(
             }
         }
     }
+
+    fun placeOrder(cartItems: List<SupplyItem>) {
+        viewModelScope.launch {
+            suppliesRepository.placeOrder(cartItems)
+            // Optionally clear cart items in local state after order is placed
+            _cartItems.value = emptyList()
+        }
+    }
+
 }

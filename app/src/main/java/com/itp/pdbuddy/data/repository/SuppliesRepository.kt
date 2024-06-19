@@ -2,6 +2,7 @@ package com.itp.pdbuddy.data.repository
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.itp.pdbuddy.ui.screen.SupplyItem
@@ -25,6 +26,33 @@ class SuppliesRepository @Inject constructor() {
             null
         }
     }
+
+    suspend fun getItemPrice(name: String): Double {
+        try {
+            val querySnapshot = db.collection("supplies")
+                .whereEqualTo("name", name)  // Query to find documents where "name" matches
+
+            val snapshot = querySnapshot.get().await()
+
+            if (!snapshot.isEmpty) {
+                // Assuming there is only one document with the matching name
+                val docSnapshot = snapshot.documents[0]
+                val price = docSnapshot.getDouble("price") ?: 1.0 // Default to 1.0 if price is null
+                val itemName = docSnapshot.getString("name") ?: "Unknown" // Retrieve the name field
+
+                Log.d(TAG, "Retrieved price for $itemName: $price")
+                return price
+            } else {
+                Log.w(TAG, "No document found in supplies collection with name $name")
+                return 0.0 // Return 0.0 or handle differently for non-existent documents
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching price for item $name: ${e.message}")
+            return 0.0 // Return 0.0 on error
+        }
+    }
+
+
 
     suspend fun fetchSuppliesList(): List<String> {
         return try {
@@ -76,9 +104,10 @@ class SuppliesRepository @Inject constructor() {
 
                 querySnapshot.documents.mapNotNull { doc ->
                     val name = doc.getString("name")
+                    val price = doc.getDouble("price")
                     val quantity = doc.getLong("quantity")?.toInt()
-                    if (name != null && quantity != null) {
-                        SupplyItem(name, quantity, checked = true, userId = username)
+                    if (name != null && price != null && quantity != null) {
+                        SupplyItem(name, quantity, checked = true, userId = username, price = price )
                     } else {
                         null
                     }
@@ -180,11 +209,15 @@ class SuppliesRepository @Inject constructor() {
 
     suspend fun addToCart(supplyItem: SupplyItem) {
         val username = getCurrentUsername()
+        val price = getItemPrice(supplyItem.name)
+
         if (username != null) {
+            val totalPrice = supplyItem.quantity * price
             val data = hashMapOf(
                 "name" to supplyItem.name,
                 "quantity" to supplyItem.quantity,
-                "username" to username
+                "username" to username,
+                "price" to totalPrice
                 // Add other fields as needed
             )
             try {
@@ -222,4 +255,96 @@ class SuppliesRepository @Inject constructor() {
             Log.e(TAG, "Username is null, cannot delete supply from cart.")
         }
     }
+
+    suspend fun placeOrder(cartItems: List<SupplyItem>) {
+        val username = getCurrentUsername()
+        if (username != null) {
+            val batch = db.batch()
+
+            // Create an order document
+            val orderDocRef = db.collection("orders").document()
+            val orderData = hashMapOf(
+                "orderId" to orderDocRef.id,
+                "userId" to username,
+                "timestamp" to System.currentTimeMillis(),
+                "items" to cartItems.map { it.toOrderItemMap() },
+                "totalAmount" to cartItems.sumOf { it.price }
+            )
+            batch.set(orderDocRef, orderData)
+
+            // Update quantities in CurrentSupplies
+            for (item in cartItems) {
+                val currentSuppliesQuery = db.collection("CurrentSupplies")
+                    .whereEqualTo("name", item.name)
+                    .whereEqualTo("username", username)
+                    .get().await()
+
+                if (!currentSuppliesQuery.isEmpty) {
+                    for (doc in currentSuppliesQuery.documents) {
+                        val currentQuantity = doc.getLong("quantity")?.toInt() ?: 0
+                        val newQuantity = currentQuantity + item.quantity
+
+                        Log.d(TAG, "Current quantity for ${item.name}: $currentQuantity")
+                        Log.d(TAG, "New quantity for ${item.name}: $newQuantity")
+
+                        // Update the document with the new quantity
+                        batch.update(doc.reference, "quantity", newQuantity)
+
+                        // Break after the first match to avoid updating multiple documents with the same name
+                        break
+                    }
+                } else {
+                    // If the item doesn't exist in CurrentSupplies, add it with the new quantity
+                    val newSupplyRef = db.collection("CurrentSupplies").document()
+                    val newSupplyData = hashMapOf(
+                        "name" to item.name,
+                        "quantity" to item.quantity,
+                        "username" to username
+                        // Add other fields as needed
+                    )
+                    batch.set(newSupplyRef, newSupplyData)
+
+                    Log.d(TAG, "Adding new supply item to CurrentSupplies: ${item.name} with quantity ${item.quantity}")
+                }
+            }
+
+            // Remove items from the cart
+            for (item in cartItems) {
+                val cartItemQuery = db.collection("CartSupplies")
+                    .whereEqualTo("name", item.name)
+                    .whereEqualTo("username", username)
+                    .get().await()
+
+                if (!cartItemQuery.isEmpty) {
+                    for (doc in cartItemQuery.documents) {
+                        batch.delete(doc.reference)
+                    }
+                } else {
+                    Log.e(TAG, "Supply not found in CartSupplies for removal")
+                }
+            }
+
+            try {
+                batch.commit().await()
+                Log.d(TAG, "Order placed and quantities updated successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error placing order and updating quantities: ${e.localizedMessage}")
+            }
+        } else {
+            Log.e(TAG, "Username is null, cannot place order.")
+        }
+    }
+
+
+
+
+    fun SupplyItem.toOrderItemMap(): Map<String, Any> {
+        return mapOf(
+            "name" to name,
+            "quantity" to quantity,
+            "price" to price
+            // Add other fields as needed
+        )
+    }
+
 }

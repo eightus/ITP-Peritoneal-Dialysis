@@ -18,7 +18,11 @@ class CartSuppliesViewModel @Inject constructor(
     private val _cartItems = MutableStateFlow<List<SupplyItem>>(emptyList())
     val cartItems: StateFlow<List<SupplyItem>> = _cartItems
 
-    fun fetchCartItems() {
+    init {
+        fetchCartItems() // Fetch cart items initially
+    }
+
+    private fun fetchCartItems() {
         viewModelScope.launch {
             val cartItemsFromRepo = suppliesRepository.fetchCartItems()
             _cartItems.value = cartItemsFromRepo
