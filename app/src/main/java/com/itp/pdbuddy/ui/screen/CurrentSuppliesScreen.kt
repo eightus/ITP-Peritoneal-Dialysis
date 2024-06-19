@@ -1,5 +1,6 @@
 package com.itp.pdbuddy.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,13 +11,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.itp.pdbuddy.R
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 
 @Composable
@@ -78,7 +79,7 @@ fun CurrentSuppliesScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { /* Handle cart button click */ }) {
+            Button( onClick = { navController.navigate("CartSupplies")}) {
                 Text("Cart")
             }
         }
@@ -96,6 +97,26 @@ fun CurrentSuppliesScreen(
     }
 }
 
+fun normalizeName(name: String): String {
+    return name.replace(" ", "").lowercase()
+}
+
+val supplyImageMap = mapOf(
+    "antibacterialsolutions" to R.drawable.antibacterialsolutions,
+    "catheterdressingkits" to R.drawable.catheterdressingkits,
+    "catheters" to R.drawable.catheters,
+    "clamps" to R.drawable.clamps,
+    "dialysissolutionbags" to R.drawable.dialysissolutionbags,
+    "emergencykit" to R.drawable.emergencykit,
+    "facemasks" to R.drawable.facemasks,
+    "measuringcontainers" to R.drawable.measuringcontainers,
+    "peritonealdialysisdrainagebags" to R.drawable.peritonealdialysisdrainagebags,
+    "sterilegloves" to R.drawable.sterilegloves,
+    "syringes" to R.drawable.syringes,
+    "tapeanddressings" to R.drawable.tapeanddressings,
+    "transfersets" to R.drawable.transfersets,
+    "wastedisposalbags" to R.drawable.wastedisposalbags
+)
 
 @Composable
 fun SupplyCard(
@@ -133,6 +154,16 @@ fun SupplyCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                val normalizedImageUrl = normalizeName(item.imageUrl)
+                val imageRes = supplyImageMap[normalizedImageUrl]
+                if (imageRes != null) {
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = item.name,
+                        modifier = Modifier.size(100.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(text = item.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
@@ -231,7 +262,10 @@ fun AddSuppliesDialog(
                 LazyColumn {
                     items(uncheckedSuppliesList) { supply ->
                         val item = tempSelectedSupplies.find { it.name == supply }
-                            ?: SupplyItem(name = supply)
+                            ?: SupplyItem(
+                                name = supply,
+                                imageUrl = normalizeName(supply)
+                            )
                         val isChecked = remember { mutableStateOf(item.checked) }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -277,10 +311,10 @@ fun AddSuppliesDialog(
     )
 }
 
-
 data class SupplyItem(
     val name: String,
     var quantity: Int = 0,
     var checked: Boolean = false,
-    val userId: String? = null
+    val userId: String? = null,
+    val imageUrl: String
 )

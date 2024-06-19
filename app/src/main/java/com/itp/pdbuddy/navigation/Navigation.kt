@@ -18,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.itp.pdbuddy.ui.screen.CartSuppliesScreen
 import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
 import com.itp.pdbuddy.ui.screen.HomeScreen
 import com.itp.pdbuddy.ui.screen.PastSuppliesScreen
@@ -114,6 +115,12 @@ object NavigationConfig {
             route = "pastSupplies",
             title = "Past Supplies",
             screen = { navController -> PastSuppliesScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "cartSupplies",
+            title = "Cart Supplies",
+            screen = { navController -> CartSuppliesScreen(navController = navController) }
 
         )
 
