@@ -52,7 +52,7 @@ class SuppliesRepository @Inject constructor(
         return if (username != null) {
             try {
                 val querySnapshot = db.collection("CurrentSupplies")
-                    .whereEqualTo("userId", username)
+                    .whereEqualTo("username", username)
                     .get().await()
 
                 querySnapshot.documents.mapNotNull { doc ->
@@ -65,10 +65,11 @@ class SuppliesRepository @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Error fetching user supplies: ${e.localizedMessage}")
                 emptyList()
             }
         } else {
+            Log.e(TAG, "Username is null, cannot fetch user supplies.")
             emptyList()
         }
     }
@@ -100,7 +101,7 @@ class SuppliesRepository @Inject constructor(
                     Log.w(TAG, "Error getting documents: ", e)
                 }
         } else {
-            Log.e(TAG, "User ID is null, cannot update supply quantity.")
+            Log.e(TAG, "Username is null, cannot update supply quantity.")
         }
     }
 
@@ -117,26 +118,27 @@ class SuppliesRepository @Inject constructor(
                     "username" to username
                 )
 
-                collectionRef
-                    .whereEqualTo("name", supply.name)
-                    .whereEqualTo("username", username)
-                    .get()
-                    .addOnSuccessListener { documents ->
-                        if (documents.isEmpty) {
-                            collectionRef.add(itemData)
-                                .addOnSuccessListener { documentReference ->
-                                    Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.w(TAG, "Error adding document", e)
-                                }
-                        } else {
-                            Log.d(TAG, "Supply already exists in Firestore")
-                        }
+                try {
+                    val documents = collectionRef
+                        .whereEqualTo("name", supply.name)
+                        .whereEqualTo("username", username)
+                        .get()
+                        .await()
+
+                    if (documents.isEmpty) {
+                        collectionRef.add(itemData)
+                            .addOnSuccessListener { documentReference ->
+                                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w(TAG, "Error adding document", e)
+                            }
+                    } else {
+                        Log.d(TAG, "Supply already exists in Firestore")
                     }
-                    .addOnFailureListener { e ->
-                        Log.w(TAG, "Error checking document", e)
-                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error adding supplies to Firestore: ${e.localizedMessage}")
+                }
             }
         }
     }

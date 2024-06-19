@@ -1,5 +1,6 @@
 package com.itp.pdbuddy.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,6 +24,9 @@ class CurrentSuppliesViewModel @Inject constructor(
 
     private val _selectedSupplies = MutableStateFlow<List<SupplyItem>>(emptyList())
     val selectedSupplies: StateFlow<List<SupplyItem>> = _selectedSupplies
+
+    private val _restockSupplies = MutableStateFlow<List<SupplyItem>>(emptyList())
+    val restockSupplies: StateFlow<List<SupplyItem>> = _restockSupplies.asStateFlow()
 
     init {
         fetchSupplies()
@@ -75,4 +79,6 @@ class CurrentSuppliesViewModel @Inject constructor(
         }
     }
 }
+
+
 
