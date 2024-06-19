@@ -138,6 +138,7 @@ fun SupplyCard(
             }
         )
     }
+    val imageRes = supplyImageMap[normalizeName(item.name)] ?: R.drawable.splash_heart
 
     ElevatedCard(
         modifier = Modifier
@@ -154,15 +155,20 @@ fun SupplyCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val normalizedImageUrl = normalizeName(item.imageUrl)
-                val imageRes = supplyImageMap[normalizedImageUrl]
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = item.name,
+                    modifier = Modifier.size(100.dp)
+                )
+                /*val normalizedImageUrl = normalizeName(item.imageUrl)
+                val imageRes = supplyImageMap
                 if (imageRes != null) {
                     Image(
                         painter = painterResource(id = imageRes),
                         contentDescription = item.name,
                         modifier = Modifier.size(100.dp)
                     )
-                }
+                }*/
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = item.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.weight(1f))
@@ -264,7 +270,7 @@ fun AddSuppliesDialog(
                         val item = tempSelectedSupplies.find { it.name == supply }
                             ?: SupplyItem(
                                 name = supply,
-                                imageUrl = normalizeName(supply)
+                                //imageUrl = normalizeName(supply)
                             )
                         val isChecked = remember { mutableStateOf(item.checked) }
                         Row(
@@ -315,6 +321,6 @@ data class SupplyItem(
     val name: String,
     var quantity: Int = 0,
     var checked: Boolean = false,
-    val userId: String? = null,
-    val imageUrl: String
+    val userId: String? = null
+    //val imageUrl: String
 )

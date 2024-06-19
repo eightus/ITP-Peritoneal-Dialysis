@@ -58,14 +58,13 @@ class SuppliesRepository @Inject constructor(
                 querySnapshot.documents.mapNotNull { doc ->
                     val name = doc.getString("name")
                     val quantity = doc.getLong("quantity")?.toInt()
-                    val imageUrl = doc.getString("imageUrl")
-                    if (name != null && quantity != null && imageUrl != null) {
-                        SupplyItem(name, quantity, checked = true, userId = username, imageUrl = imageUrl)
+                    //val imageUrl = doc.getString("imageUrl")
+                    if (name != null && quantity != null ) {
+                        SupplyItem(name, quantity, checked = true, userId = username)
                     } else {
                         null
                     }
                 }
-
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching user supplies: ${e.localizedMessage}")
                 emptyList()
