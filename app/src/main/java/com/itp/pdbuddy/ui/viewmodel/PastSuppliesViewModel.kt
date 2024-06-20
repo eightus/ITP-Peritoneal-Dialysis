@@ -8,6 +8,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 data class Item(
@@ -19,6 +22,7 @@ data class Item(
 data class Order(
     val orderId: String = "",
     val timestamp: Long = 0,
+    val formattedTimestamp: String = "",
     val totalAmount: Int = 0,
     val userId: String = "",
     val items: List<Item> = emptyList()
@@ -52,9 +56,14 @@ class PastSuppliesViewModel @Inject constructor(private val suppliesRepository: 
                                 quantity = (it["quantity"] as Long).toInt()
                             )
                         }
+                        val timestamp = document.getLong("timestamp") ?: 0
+                        val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
+                        val formattedTimestamp = sdf.format(Date(timestamp))
+
                         Order(
                             orderId = document.id,
-                            timestamp = document.getLong("timestamp") ?: 0,
+                            timestamp = timestamp,
+                            formattedTimestamp = formattedTimestamp, // Set the formatted timestamp
                             totalAmount = document.getLong("totalAmount")?.toInt() ?: 0,
                             userId = document.getString("userId") ?: "",
                             items = itemList
@@ -82,9 +91,14 @@ class PastSuppliesViewModel @Inject constructor(private val suppliesRepository: 
                                 quantity = (it["quantity"] as Long).toInt()
                             )
                         }
+                        val timestamp = document.getLong("timestamp") ?: 0
+                        val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
+                        val formattedTimestamp = sdf.format(Date(timestamp))
+
                         val order = Order(
                             orderId = document.id,
-                            timestamp = document.getLong("timestamp") ?: 0,
+                            timestamp = timestamp,
+                            formattedTimestamp = formattedTimestamp, // Set the formatted timestamp
                             totalAmount = document.getLong("totalAmount")?.toInt() ?: 0,
                             userId = document.getString("userId") ?: "",
                             items = itemList

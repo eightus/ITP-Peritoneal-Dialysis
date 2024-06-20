@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.twotone.Inventory2
+import androidx.compose.material.icons.twotone.Payments
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -55,15 +56,30 @@ fun PaymentScreen(
                 .fillMaxSize()
                 .padding(it)
         ) {
+            Spacer(modifier = Modifier.height(48.dp))
+            Icon(
+                imageVector = Icons.TwoTone.Payments,
+                contentDescription = "Payments",
+                modifier = Modifier.size(96.dp)
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Payment Successful",
-                    fontSize = 40.sp,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Your order will arrive shortly.",
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()

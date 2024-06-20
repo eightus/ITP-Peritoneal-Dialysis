@@ -7,6 +7,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.itp.pdbuddy.ui.screen.SupplyItem
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class SuppliesRepository @Inject constructor() {
@@ -256,6 +259,7 @@ class SuppliesRepository @Inject constructor() {
         }
     }
 
+
     suspend fun placeOrder(cartItems: List<SupplyItem>) {
         val username = getCurrentUsername()
         if (username != null) {
@@ -263,10 +267,20 @@ class SuppliesRepository @Inject constructor() {
 
             // Create an order document
             val orderDocRef = db.collection("orders").document()
+            val timestamp = System.currentTimeMillis()
+
+            // Convert timestamp to Date object
+            val date = Date(timestamp)
+
+            // Format Date object to desired string format
+            val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
+            val formattedDate = sdf.format(date)
+
             val orderData = hashMapOf(
                 "orderId" to orderDocRef.id,
                 "userId" to username,
-                "timestamp" to System.currentTimeMillis(),
+                "timestamp" to timestamp,
+                "formattedTimestamp" to formattedDate, // Add formatted timestamp
                 "items" to cartItems.map { it.toOrderItemMap() },
                 "totalAmount" to cartItems.sumOf { it.price }
             )
@@ -284,9 +298,6 @@ class SuppliesRepository @Inject constructor() {
                         val currentQuantity = doc.getLong("quantity")?.toInt() ?: 0
                         val newQuantity = currentQuantity + item.quantity
 
-                        Log.d(TAG, "Current quantity for ${item.name}: $currentQuantity")
-                        Log.d(TAG, "New quantity for ${item.name}: $newQuantity")
-
                         // Update the document with the new quantity
                         batch.update(doc.reference, "quantity", newQuantity)
 
@@ -303,8 +314,6 @@ class SuppliesRepository @Inject constructor() {
                         // Add other fields as needed
                     )
                     batch.set(newSupplyRef, newSupplyData)
-
-                    Log.d(TAG, "Adding new supply item to CurrentSupplies: ${item.name} with quantity ${item.quantity}")
                 }
             }
 
@@ -345,6 +354,38 @@ class SuppliesRepository @Inject constructor() {
             "price" to price
             // Add other fields as needed
         )
+    }
+    suspend fun updateCartItemQuantity(supplyItem: SupplyItem, newQuantity: Int, onSuccess: () -> Unit) {
+        val username = getCurrentUsername()
+        if (username != null) {
+            val cartItemQuery = db.collection("CartSupplies")
+                .whereEqualTo("name", supplyItem.name)
+                .whereEqualTo("username", username)
+                .get().await()
+
+            if (!cartItemQuery.isEmpty) {
+                val document = cartItemQuery.documents[0]
+                try {
+                    // Fetch the original price from the Supplies collection
+                    val originalPrice = getItemPrice(supplyItem.name)
+                    val newTotalPrice = newQuantity * originalPrice
+
+                    val newQuantityData = mapOf(
+                        "quantity" to newQuantity,
+                        "price" to newTotalPrice // Update total price based on the original price
+                    )
+
+                    document.reference.update(newQuantityData).await()
+                    onSuccess.invoke()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error updating cart item quantity: ${e.localizedMessage}")
+                }
+            } else {
+                Log.e(TAG, "Cart item not found for update")
+            }
+        } else {
+            Log.e(TAG, "Username is null, cannot update cart item quantity.")
+        }
     }
 
 }

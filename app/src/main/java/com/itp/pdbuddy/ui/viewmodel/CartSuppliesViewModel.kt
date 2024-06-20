@@ -19,7 +19,7 @@ class CartSuppliesViewModel @Inject constructor(
     val cartItems: StateFlow<List<SupplyItem>> = _cartItems
 
     init {
-        fetchCartItems() // Fetch cart items initially
+        fetchCartItems()
     }
 
     private fun fetchCartItems() {
@@ -32,12 +32,14 @@ class CartSuppliesViewModel @Inject constructor(
     fun removeFromCart(supplyItem: SupplyItem) {
         viewModelScope.launch {
             suppliesRepository.removeFromCart(supplyItem) {
+                // Update local state by removing the item from _cartItems
+                val updatedList = _cartItems.value.toMutableList()
+                updatedList.remove(supplyItem)
+                _cartItems.value = updatedList
             }
-            // Update local state by removing the item from _cartItems
-            val updatedList = _cartItems.value.toMutableList()
-            updatedList.remove(supplyItem)
-            _cartItems.value = updatedList
         }
     }
 
+
 }
+

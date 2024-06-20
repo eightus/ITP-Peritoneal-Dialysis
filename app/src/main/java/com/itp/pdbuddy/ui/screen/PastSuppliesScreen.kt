@@ -64,7 +64,7 @@ fun OrderCard(order: Order, onClick: () -> Unit) {
                 fontSize = 16.sp
             )
             Text(
-                text = "Timestamp: ${order.timestamp}",
+                text = "Timestamp: ${order.formattedTimestamp}", // Use formatted timestamp
                 color = Color.White,
                 fontSize = 14.sp
             )

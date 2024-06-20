@@ -130,9 +130,7 @@ fun SupplyCard(
     onRestock: (SupplyItem, Int) -> Unit
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
-    var editedQuantity by remember { mutableStateOf(item.quantity.toString()) }
     var showRestockDialog by remember { mutableStateOf(false) }
-    var restockQuantity by remember { mutableStateOf(0) }
 
     if (showEditDialog) {
         UpdateQuantityDialog(
@@ -150,8 +148,7 @@ fun SupplyCard(
         RestockDialog(
             onDismissRequest = { showRestockDialog = false },
             onConfirm = { quantity ->
-                restockQuantity = quantity
-                onRestock(item, restockQuantity)
+                onRestock(item, quantity)
                 showRestockDialog = false
             }
         )
@@ -182,16 +179,6 @@ fun SupplyCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = item.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = {
-                        onDeleteSupply(item)
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete"
-                    )
-                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -200,6 +187,15 @@ fun SupplyCard(
             ) {
                 Text(text = "Quantity: ${item.quantity}", fontSize = 16.sp)
                 Spacer(modifier = Modifier.weight(1f))
+                IconButton(
+                    onClick = { onDeleteSupply(item) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete"
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { showEditDialog = true }) {
                     Text("Edit")
                 }
