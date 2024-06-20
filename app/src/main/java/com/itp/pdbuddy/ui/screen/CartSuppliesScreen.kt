@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.twotone.Inventory2
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -73,11 +75,12 @@ fun CartSuppliesScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     items(cartItems) { item ->
-                        CartItemCard(item = item,
-                            onRemoveCart = { supplyItem ->
-                                csviewModel.removeFromCart(supplyItem)
-                            },
-                            /* edit cart function */
+                        CartItemCard(
+                            item = item,
+                            onRemoveCart = { supplyItem -> csviewModel.removeFromCart(supplyItem) },
+                            onUpdateQuantity = { supplyItem, newQuantity ->
+                                csviewModel.updateCartItemQuantity(supplyItem, newQuantity)
+                            }
                         )
                     }
                 }
@@ -98,7 +101,9 @@ fun CartSuppliesScreen(
 @Composable
 fun CartItemCard(
     item: SupplyItem,
-    onRemoveCart: (SupplyItem) -> Unit) {
+    onRemoveCart: (SupplyItem) -> Unit,
+    onUpdateQuantity: (SupplyItem, Int) -> Unit
+) {
     val imageRes = supplyImageMap[normalizeName(item.name)] ?: R.drawable.splash_heart
     ElevatedCard(
         modifier = Modifier
@@ -141,8 +146,14 @@ fun CartItemCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Quantity: ${item.quantity}", fontSize = 16.sp)
-                Spacer(modifier = Modifier.weight(1f))
+                Text(text = "Quantity: ", fontSize = 16.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                QuantityEditor(
+                    quantity = item.quantity,
+                    onQuantityChange = { newQuantity ->
+                        onUpdateQuantity(item, newQuantity) // Call this on quantity change
+                    }
+                )
 
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = "Total Price: $${item.price}", fontSize = 16.sp)
@@ -150,6 +161,19 @@ fun CartItemCard(
 
 
 
+        }
+    }
+
+}
+@Composable
+fun QuantityEditor(quantity: Int, onQuantityChange: (Int) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { if (quantity > 1) onQuantityChange(quantity - 1) }) {
+            Icon(imageVector = Icons.Default.Remove, contentDescription = "Decrease")
+        }
+        Text(text = quantity.toString(), fontSize = 16.sp)
+        IconButton(onClick = { onQuantityChange(quantity + 1) }) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Increase")
         }
     }
 }

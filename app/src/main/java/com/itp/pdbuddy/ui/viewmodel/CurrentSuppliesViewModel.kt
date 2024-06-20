@@ -133,4 +133,18 @@ class CurrentSuppliesViewModel @Inject constructor(
 //        }
 //    }
 
+    fun updateCartItemQuantity(supplyItem: SupplyItem, newQuantity: Int) {
+        viewModelScope.launch {
+            suppliesRepository.updateCartItemQuantity(supplyItem, newQuantity) {
+                val updatedCartList = _cartItems.value.toMutableList()
+                val index = updatedCartList.indexOfFirst { it.name == supplyItem.name }
+                if (index != -1) {
+                    val updatedItem = supplyItem.copy(quantity = newQuantity, price = supplyItem.price / supplyItem.quantity * newQuantity)
+                    updatedCartList[index] = updatedItem
+                    _cartItems.value = updatedCartList
+                }
+            }
+        }
+    }
+
 }

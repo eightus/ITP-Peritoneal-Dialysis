@@ -366,13 +366,12 @@ class SuppliesRepository @Inject constructor() {
             if (!cartItemQuery.isEmpty) {
                 val document = cartItemQuery.documents[0]
                 try {
-                    // Fetch the original price from the Supplies collection
                     val originalPrice = getItemPrice(supplyItem.name)
                     val newTotalPrice = newQuantity * originalPrice
 
                     val newQuantityData = mapOf(
                         "quantity" to newQuantity,
-                        "price" to newTotalPrice // Update total price based on the original price
+                        "price" to newTotalPrice
                     )
 
                     document.reference.update(newQuantityData).await()
@@ -388,4 +387,7 @@ class SuppliesRepository @Inject constructor() {
         }
     }
 
+
 }
+
+
