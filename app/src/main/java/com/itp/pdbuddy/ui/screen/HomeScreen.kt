@@ -49,7 +49,7 @@ fun HomeScreen(navController: NavController) {
 fun HomeScreenContent(navController: NavController, username: Result<String?>) {
     val profileItems = listOf(
         ProfileItem(Icons.TwoTone.Inventory2, "Supplies") {
-            navController.navigate("home")
+            navController.navigate("supplies")
         },
         ProfileItem(Icons.TwoTone.LocalPharmacy, "Prescription") {
             navController.navigate("home")

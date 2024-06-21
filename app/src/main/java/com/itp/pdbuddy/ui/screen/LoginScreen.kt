@@ -93,7 +93,7 @@ fun LoginScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
             // App name
             Text(
-                text = "PeritonealCare",
+                text = "PDBuddy",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
