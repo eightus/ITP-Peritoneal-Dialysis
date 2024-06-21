@@ -124,10 +124,10 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
 
-//    NavHost(navController = navController, startDestination = "home", modifier = modifier) {
-//        addNavItems(navController, NavigationConfig.navItems)
-//    }
-    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "manualrecord", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
+//    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+//        addNavItems(navController, NavigationConfig.navItems)
+//    }
 }
