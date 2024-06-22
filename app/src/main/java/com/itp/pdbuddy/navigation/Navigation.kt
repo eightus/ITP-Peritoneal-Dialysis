@@ -23,6 +23,7 @@ import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.screen.RecordScreen
 import com.itp.pdbuddy.ui.screen.ManualRecordScreen
 import com.itp.pdbuddy.ui.screen.AutoRecordScreen
+import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 
 data class NavItem(
     val route: String,
@@ -76,6 +77,12 @@ object NavigationConfig {
             title = "autorecord",
             icon = Icons.Default.Person,
             screen = { navController -> AutoRecordScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "recordsuccess",
+            title = "recordsuccess",
+            icon = Icons.Default.Person,
+            screen = { navController -> RecordSuccessScreen(navController = navController) }
         ),
         NavItem(
             route = "resources",

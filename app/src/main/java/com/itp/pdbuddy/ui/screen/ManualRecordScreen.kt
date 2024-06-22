@@ -1,5 +1,6 @@
 package com.itp.pdbuddy.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
@@ -39,6 +41,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,28 +51,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
-import com.itp.pdbuddy.ui.viewmodel.ProfileViewModel
+import com.itp.pdbuddy.ui.viewmodel.RecordViewModel
+import com.itp.pdbuddy.utils.Result
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Composable
+fun ManualRecordScreen(navController: NavController) {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val username by authViewModel.username.collectAsState()
+    authViewModel.fetchUsername()
+    ManualRecordScreenContent(navController = navController, username = username)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManualRecordScreen(navController: NavHostController) {
-    val profileViewModel: ProfileViewModel = hiltViewModel()
-    val authViewModel: AuthViewModel = hiltViewModel()
+fun ManualRecordScreenContent(navController: NavController, username: Result<String?>) {
+    val recordViewModel: RecordViewModel = hiltViewModel()
 
     // State Variables
     val datePickerState =
@@ -82,6 +89,14 @@ fun ManualRecordScreen(navController: NavHostController) {
     val showTimeOffDatePicker = remember { mutableStateOf(false) }
     var showTherapyDropdown by remember { mutableStateOf(false) }
     val therapyItems = listOf("A", "B", "C", "D", "E", "F")
+
+    // Username
+    val usernameText = when (username) {
+        is Result.Idle -> "Fetching username..."
+        is Result.Loading -> "Loading..."
+        is Result.Success -> (username).data ?: "User"
+        is Result.Failure -> "Failed to fetch username"
+    }
 
     // Input values
     var recordingDate by remember { mutableStateOf(SimpleDateFormat("dd/M/yyyy").format(Date())) }
@@ -120,6 +135,10 @@ fun ManualRecordScreen(navController: NavHostController) {
     LaunchedEffect(totalUF.value, lastFillVol.value, initDrain.value) {
         nettUF.value = calculateNettUF(totalUF.value, lastFillVol.value, initDrain.value)
     }
+
+    //
+    val submitResult by recordViewModel.recordResult.collectAsState()
+
     Column {
 
         // UI Element
@@ -335,10 +354,46 @@ fun ManualRecordScreen(navController: NavHostController) {
                 textNumberBox(title = "Remarks", variable = remarks, numeric = false)
             }
             item{
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "Submit")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ){
+                    Button(onClick = { recordViewModel.submitRecord(
+                        usernameText,listOf(
+                             recordingDate, bp.value, hr.value, weight.value, uo.value,
+                            timeOn.value, timeOff.value, hbr15.value, hbr25.value, hbr425.value,
+                            sbw15.value, sbw25.value, sbw425.value, lbb15.value, lbb25.value,
+                            lbb425.value, lbbo.value, therapyItems[therapy.value], totalVolume.value,
+                            targetUF.value, therapyTime.value, fillVol.value, lastFillVol.value,
+                            dextCon.value, cycles.value, initDrain.value, avgDwellTime.value,
+                            colorDrain.value, totalUF.value, nettUF.value, remarks.value)
+                    ) }) {
+                        Text(text = "Submit")
+                    }
+                    when (submitResult) {
+                        is Result.Loading -> {
+                            CircularProgressIndicator()
+                        }
+                        is Result.Success -> {
+                            // Navigate to home screen on success
+                            LaunchedEffect(Unit) {
+                                navController.navigate("recordsuccess") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        }
+                        is Result.Failure -> {
+                            Text(
+                                text = "Failed: ${(submitResult as Result.Failure).exception.message}",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        is Result.Idle -> { Text("") }
+                    }
+
+                }
+
             }
-        }
 
         }
     }
