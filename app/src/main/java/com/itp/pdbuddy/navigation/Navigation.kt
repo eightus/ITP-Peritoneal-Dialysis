@@ -27,6 +27,10 @@ import com.itp.pdbuddy.ui.screen.OrderDetailsScreen
 import com.itp.pdbuddy.ui.screen.PaymentScreen
 import com.itp.pdbuddy.ui.screen.ProfileScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
+import com.itp.pdbuddy.ui.screen.RecordScreen
+import com.itp.pdbuddy.ui.screen.ManualRecordScreen
+import com.itp.pdbuddy.ui.screen.AutoRecordScreen
+import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 
@@ -66,6 +70,30 @@ object NavigationConfig {
             title = "Profile",
             icon = Icons.Default.Person,
             screen = { navController -> ProfileScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "record",
+            title = "record",
+            icon = Icons.Default.Person,
+            screen = { navController -> RecordScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "manualrecord",
+            title = "manualrecord",
+            icon = Icons.Default.Person,
+            screen = { navController -> ManualRecordScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "autorecord",
+            title = "autorecord",
+            icon = Icons.Default.Person,
+            screen = { navController -> AutoRecordScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "recordsuccess",
+            title = "recordsuccess",
+            icon = Icons.Default.Person,
+            screen = { navController -> RecordSuccessScreen(navController = navController) }
         ),
         NavItem(
             route = "resources",
@@ -169,7 +197,11 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
-    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+
+    NavHost(navController = navController, startDestination = "manualrecord", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
+//    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+//        addNavItems(navController, NavigationConfig.navItems)
+//    }
 }
