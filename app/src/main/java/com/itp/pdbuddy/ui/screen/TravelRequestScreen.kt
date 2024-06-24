@@ -33,6 +33,7 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
 
     // Fetch supplies from ViewModel
     val supplies by viewModel.supplies.collectAsState()
+    val username by viewModel.username.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -188,6 +189,7 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
         }
     }
 }
+
 
 data class SupplyRequest(
     val name: String = "",
