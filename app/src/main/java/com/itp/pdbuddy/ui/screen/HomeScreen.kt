@@ -55,7 +55,7 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             navController.navigate("home")
         },
         ProfileItem(Icons.TwoTone.Flight, "Travel") {
-            navController.navigate("home")
+            navController.navigate("travel")
         },
         ProfileItem(Icons.AutoMirrored.TwoTone.MenuBook, "Resources") {
             navController.navigate("home")

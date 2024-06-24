@@ -32,6 +32,9 @@ import com.itp.pdbuddy.ui.screen.ManualRecordScreen
 import com.itp.pdbuddy.ui.screen.AutoRecordScreen
 import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
+import com.itp.pdbuddy.ui.screen.TravelDetailsScreen
+import com.itp.pdbuddy.ui.screen.TravelRequestScreen
+import com.itp.pdbuddy.ui.screen.TravelScreen
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 
 
@@ -168,6 +171,26 @@ object NavigationConfig {
                 val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
                 OrderDetailsScreen(orderId = orderId)
             }
+        ),
+        NavItem(
+            route = "travel",
+            title = "Travel",
+            screen = { navController -> TravelScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "travelDetails/{country}",
+            title = "Travel Details",
+            screenWithParam = { navController, backStackEntry ->
+                val country = backStackEntry.arguments?.getString("country") ?: ""
+                TravelDetailsScreen(navController = navController, country = country)
+            }
+        ),
+        NavItem(
+            route = "travelRequest",
+            title = "Travel Request",
+            screen = { navController -> TravelRequestScreen(navController = navController) }
+
         )
     )
 }
@@ -198,7 +221,7 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
 
-    NavHost(navController = navController, startDestination = "manualrecord", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
 //    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
