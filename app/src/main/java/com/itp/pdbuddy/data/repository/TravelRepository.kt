@@ -46,12 +46,14 @@ class TravelRepository @Inject constructor() {
         country: String,
         hotelAddress: String,
         travelDates: String,
-        supplyRequests: List<SupplyRequest>
+        supplyRequests: List<SupplyRequest>,
+        username: String? // Add username as a parameter
     ) {
         val request = hashMapOf(
             "country" to country,
             "hotelAddress" to hotelAddress,
             "travelDates" to travelDates,
+            "username" to username,
             "supplies" to supplyRequests.map { supply ->
                 mapOf(
                     "name" to supply.name,
@@ -64,6 +66,7 @@ class TravelRepository @Inject constructor() {
             .add(request)
             .await()
     }
+
 
     suspend fun getSupplies(): List<String> {
         return try {
