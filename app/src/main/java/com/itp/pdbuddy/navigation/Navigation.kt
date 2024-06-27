@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalDining
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SmartScreen
 import androidx.compose.material.icons.twotone.Inventory2
@@ -30,12 +29,13 @@ import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.screen.RecordScreen
 import com.itp.pdbuddy.ui.screen.ManualRecordScreen
 import com.itp.pdbuddy.ui.screen.AutoRecordScreen
+import com.itp.pdbuddy.ui.screen.NewNotificationScreen
 import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
+import com.itp.pdbuddy.ui.screen.NotificationScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TravelDetailsScreen
 import com.itp.pdbuddy.ui.screen.TravelRequestScreen
 import com.itp.pdbuddy.ui.screen.TravelScreen
-import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 
 
 data class NavItem(
@@ -191,7 +191,19 @@ object NavigationConfig {
             title = "Travel Request",
             screen = { navController -> TravelRequestScreen(navController = navController) }
 
+        ),
+        NavItem(
+            route = "setNotification",
+            title = "setNotification",
+            screen = { navController -> NotificationScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "newNotification",
+            title = "newNotification",
+            screen = { navController -> NewNotificationScreen(navController = navController) }
         )
+
+
     )
 }
 
