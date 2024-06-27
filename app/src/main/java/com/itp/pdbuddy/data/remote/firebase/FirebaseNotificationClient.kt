@@ -1,19 +1,11 @@
 package com.itp.pdbuddy.data.remote.firebase
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.media.RingtoneManager
-import android.os.Build
+
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.itp.pdbuddy.MainActivity
-import com.itp.pdbuddy.R
+
 
 class FirebaseNotificationClient : FirebaseMessagingService()  {
 
