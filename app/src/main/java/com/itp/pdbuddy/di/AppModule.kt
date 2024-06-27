@@ -9,7 +9,9 @@ import com.itp.pdbuddy.data.remote.firebase.FirebaseRecordDataSource
 import com.itp.pdbuddy.data.remote.api.ExternalAPIDataSource
 import com.itp.pdbuddy.data.remote.APIDataSource
 import com.itp.pdbuddy.data.remote.NotificationDAO
+import com.itp.pdbuddy.data.remote.PrescriptionDataSource
 import com.itp.pdbuddy.data.remote.database.NotificationRoomDatabase
+import com.itp.pdbuddy.data.remote.firebase.FirebasePrescriptionDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -28,6 +30,12 @@ abstract class AuthModule {
     abstract fun bindAuthDataSource(
         firebaseAuthDataSource: FirebaseAuthDataSource
     ): AuthDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindPrescriptionDataSource(
+        firebasePrescriptionDataSource: FirebasePrescriptionDataSource
+    ): PrescriptionDataSource
 
     @Binds
     @Singleton

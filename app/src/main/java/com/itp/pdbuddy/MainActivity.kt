@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
@@ -40,14 +41,23 @@ import com.itp.pdbuddy.navigation.AppNavigation
 import com.itp.pdbuddy.ui.screen.LoginScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
+import com.itp.pdbuddy.utils.PermissionHelper
 import com.itp.pdbuddy.utils.navigate
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private lateinit var permissionHelper: PermissionHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Create the notification channel
+        permissionHelper = PermissionHelper(this)
+        permissionHelper.askNotificationPermission()
+
+        createNotificationChannel()
         setContent {
             val navController = rememberNavController()
             PDBuddyTheme {
@@ -60,7 +70,21 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun createNotificationChannel() {
+        val channelId = "PDBuddy"
+        val channelName = "PDBuddy Channel"
+        val channelDescription = "Notification channel for PDBuddy"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel(channelId, channelName, importance).apply {
+            description = channelDescription
+        }
+
+        val notificationManager = ContextCompat.getSystemService(this, NotificationManager::class.java)
+        notificationManager?.createNotificationChannel(channel)
+    }
 }
+
 
 @Composable
 fun MainScreen(navController: NavHostController) {
