@@ -32,6 +32,9 @@ import com.itp.pdbuddy.ui.screen.AutoRecordScreen
 import com.itp.pdbuddy.ui.screen.NewNotificationScreen
 import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.NotificationScreen
+import com.itp.pdbuddy.ui.screen.PrescriptionHistoryScreen
+import com.itp.pdbuddy.ui.screen.PrescriptionManagementScreen
+import com.itp.pdbuddy.ui.screen.PrescriptionManualScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TravelDetailsScreen
 import com.itp.pdbuddy.ui.screen.TravelRequestScreen
@@ -201,6 +204,21 @@ object NavigationConfig {
             route = "newNotification",
             title = "newNotification",
             screen = { navController -> NewNotificationScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "prescription",
+            title = "Prescription",
+            screen = { navController -> PrescriptionManagementScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "prescriptionManual",
+            title = "Manual Update",
+            screen = { navController -> PrescriptionManualScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "prescriptionHistory",
+            title = "History",
+            screen = { navController -> PrescriptionHistoryScreen(navController = navController) }
         )
 
 
