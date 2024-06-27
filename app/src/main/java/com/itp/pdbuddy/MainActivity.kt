@@ -2,6 +2,7 @@ package com.itp.pdbuddy
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,7 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getString
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -195,3 +197,5 @@ fun MainScreenPreview() {
         MainScreen(rememberNavController())
     }
 }
+
+

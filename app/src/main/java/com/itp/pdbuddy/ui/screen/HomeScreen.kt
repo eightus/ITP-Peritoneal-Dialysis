@@ -53,13 +53,13 @@ fun HomeScreen(navController: NavController) {
 fun HomeScreenContent(navController: NavController, username: Result<String?>) {
     val profileItems = listOf(
         ProfileItem(Icons.TwoTone.Inventory2, "Supplies") {
-            navController.navigate("home")
+            navController.navigate("supplies")
         },
         ProfileItem(Icons.TwoTone.LocalPharmacy, "Prescription") {
             navController.navigate("home")
         },
         ProfileItem(Icons.TwoTone.Flight, "Travel") {
-            navController.navigate("home")
+            navController.navigate("travel")
         },
         ProfileItem(Icons.AutoMirrored.TwoTone.MenuBook, "Resources") {
             navController.navigate("home")
@@ -68,7 +68,7 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             navController.navigate("home")
         },
         ProfileItem(Icons.TwoTone.Notifications, "Reminders") {
-            navController.navigate("home")
+            navController.navigate("setNotification")
         }
     )
 
