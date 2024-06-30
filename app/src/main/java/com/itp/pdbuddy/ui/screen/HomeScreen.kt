@@ -52,10 +52,10 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             navController.navigate("supplies")
         },
         ProfileItem(Icons.TwoTone.LocalPharmacy, "Prescription") {
-            navController.navigate("home")
+            navController.navigate("prescription")
         },
         ProfileItem(Icons.TwoTone.Flight, "Travel") {
-            navController.navigate("home")
+            navController.navigate("travel")
         },
         ProfileItem(Icons.AutoMirrored.TwoTone.MenuBook, "Resources") {
             navController.navigate("resources")
@@ -64,7 +64,7 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             navController.navigate("home")
         },
         ProfileItem(Icons.TwoTone.Notifications, "Reminders") {
-            navController.navigate("home")
+            navController.navigate("setNotification")
         }
     )
 

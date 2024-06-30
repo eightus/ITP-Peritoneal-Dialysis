@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalDining
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SmartScreen
 import androidx.compose.material.icons.twotone.Inventory2
@@ -38,6 +37,16 @@ import com.itp.pdbuddy.ui.screen.ResourcesScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TrainingScreen
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
+import com.itp.pdbuddy.ui.screen.NewNotificationScreen
+import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
+import com.itp.pdbuddy.ui.screen.NotificationScreen
+import com.itp.pdbuddy.ui.screen.PrescriptionHistoryScreen
+import com.itp.pdbuddy.ui.screen.PrescriptionManagementScreen
+import com.itp.pdbuddy.ui.screen.PrescriptionManualScreen
+import com.itp.pdbuddy.ui.screen.SuppliesScreen
+import com.itp.pdbuddy.ui.screen.TravelDetailsScreen
+import com.itp.pdbuddy.ui.screen.TravelRequestScreen
+import com.itp.pdbuddy.ui.screen.TravelScreen
 
 
 data class NavItem(
@@ -159,8 +168,51 @@ object NavigationConfig {
             route = "additionalmaterial",
             title = "additionalmaterial",
             screen = { navController -> AdditionalMaterialScreen(navController = navController) }
-        )
+        ),
+        NavItem(
+            route = "travel",
+            title = "Travel",
+            screen = { navController -> TravelScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "travelDetails/{country}",
+            title = "Travel Details",
+            screenWithParam = { navController, backStackEntry ->
+                val country = backStackEntry.arguments?.getString("country") ?: ""
+                TravelDetailsScreen(navController = navController, country = country)
+            }
+        ),
+        NavItem(
+            route = "travelRequest",
+            title = "Travel Request",
+            screen = { navController -> TravelRequestScreen(navController = navController) }
 
+        ),
+        NavItem(
+            route = "setNotification",
+            title = "setNotification",
+            screen = { navController -> NotificationScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "newNotification",
+            title = "newNotification",
+            screen = { navController -> NewNotificationScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "prescription",
+            title = "Prescription",
+            screen = { navController -> PrescriptionManagementScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "prescriptionManual",
+            title = "Manual Update",
+            screen = { navController -> PrescriptionManualScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "prescriptionHistory",
+            title = "History",
+            screen = { navController -> PrescriptionHistoryScreen(navController = navController) }
+        )
     )
 }
 
@@ -190,7 +242,7 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
 
-    NavHost(navController = navController, startDestination = "manualrecord", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
 //    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
