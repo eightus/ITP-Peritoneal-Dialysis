@@ -20,6 +20,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.itp.pdbuddy.data.repository.Resource
+import com.itp.pdbuddy.ui.screen.AdditionalMaterialScreen
 import com.itp.pdbuddy.ui.screen.CartSuppliesScreen
 import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
 import com.itp.pdbuddy.ui.screen.HomeScreen
@@ -30,8 +32,11 @@ import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.screen.RecordScreen
 import com.itp.pdbuddy.ui.screen.ManualRecordScreen
 import com.itp.pdbuddy.ui.screen.AutoRecordScreen
+import com.itp.pdbuddy.ui.screen.DietScreen
 import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
+import com.itp.pdbuddy.ui.screen.ResourcesScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
+import com.itp.pdbuddy.ui.screen.TrainingScreen
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 
 
@@ -99,36 +104,7 @@ object NavigationConfig {
             route = "resources",
             title = "Resources",
             icon = Icons.Default.History,
-            screen = { navController -> HomeScreen(navController = navController) },
-            children = listOf(
-                NavItem(
-                    route = "resourcesDiet",
-                    title = "Dietary",
-                    icon = Icons.Default.LocalDining,
-                    screen = { navController -> HomeScreen(navController = navController) },
-                    children = listOf(
-                        NavItem(
-                            route = "resourceDietCalculator",
-                            title = "Dietary Calculator",
-                            icon = Icons.Default.Calculate,
-                            screen = { navController -> HomeScreen(navController = navController) }
-                        )
-                    )
-                ),
-                NavItem(
-                    route = "resourcesTraining",
-                    title = "Training",
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    screen = { navController -> HomeScreen(navController = navController) }
-                ),
-                NavItem(
-                    route = "resourcesTraining",
-                    title = "Training",
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    screen = { navController -> HomeScreen(navController = navController) }
-
-                )
-            )
+            screen = { navController -> ResourcesScreen(navController = navController) }
         ),
         NavItem(
             route = "supplies",
@@ -168,7 +144,23 @@ object NavigationConfig {
                 val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
                 OrderDetailsScreen(orderId = orderId)
             }
+        ),
+        NavItem(
+            route = "diet",
+            title = "diet",
+            screen = { navController -> DietScreen(navController = navController)}
+        ),
+        NavItem(
+            route = "training",
+            title = "training",
+            screen = { navController -> TrainingScreen(navController = navController) }
+        ),
+        NavItem(
+            route = "additionalmaterial",
+            title = "additionalmaterial",
+            screen = { navController -> AdditionalMaterialScreen(navController = navController) }
         )
+
     )
 }
 
