@@ -1,6 +1,6 @@
 package com.itp.pdbuddy.ui.screen
 
-import android.util.Log
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -31,23 +31,30 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,11 +64,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
 import com.itp.pdbuddy.ui.viewmodel.RecordViewModel
 import com.itp.pdbuddy.utils.Result
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -73,22 +81,37 @@ fun ManualRecordScreen(navController: NavController) {
     ManualRecordScreenContent(navController = navController, username = username)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualRecordScreenContent(navController: NavController, username: Result<String?>) {
     val recordViewModel: RecordViewModel = hiltViewModel()
 
     // State Variables
-    val datePickerState =
-        rememberDatePickerState(
-            initialDisplayedMonthMillis = System.currentTimeMillis(),
-            yearRange = 2000..2024
-        )
     val showRecordingDatePicker = remember { mutableStateOf(false) }
     val showTimeOnDatePicker = remember { mutableStateOf(false) }
     val showTimeOffDatePicker = remember { mutableStateOf(false) }
+    val recordingDateState = remember { mutableStateOf(Calendar.getInstance()) }
+    val timeOnState = remember { mutableStateOf(Calendar.getInstance()) }
+    val timeOffState = remember { mutableStateOf(Calendar.getInstance()) }
+    val timeOnSelected = remember{ mutableStateOf(false)}
+    val timeOffSelected = remember{ mutableStateOf(false)}
     var showTherapyDropdown by remember { mutableStateOf(false) }
-    val therapyItems = listOf("A", "B", "C", "D", "E", "F")
+    var showColorDropdown by remember { mutableStateOf(false) }
+    var showRedBagDropdown by remember { mutableStateOf(false) }
+    var showWhiteBagDropdown by remember { mutableStateOf(false) }
+    var showBlueBagDropdown by remember { mutableStateOf(false) }
+
+    // Dropdown items
+    val therapyItems = listOf("CAPD", "APD")
+    val dischargeColor = listOf(
+        "Clear Yellow", "Cloudy Yellow", "Red", "Orange", "Rust", "Bright Yellow",
+        "Yellow Green", "Green", "Green with Particles", "Brown Green", "Blue/Purple",
+        "Clear Brown", "Brown Black", "Milk White", "Peach/Pink")
+    val bagDext = listOf("1.5% Dext", "2.5% Dext", "4.25% Dext")
+    val blueDext = listOf("1.5% Dext", "2.5% Dext", "4.25% Dext", "Others")
+
+    // Formatters
+    var dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    var datetimeFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault())
 
     // Username
     val usernameText = when (username) {
@@ -104,19 +127,26 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
     val hr = remember { mutableStateOf("") }
     var weight = remember { mutableStateOf("") }
     var uo = remember { mutableStateOf("") }
-    var timeOn = remember { mutableStateOf("") }
-    var timeOff = remember { mutableStateOf("") }
-    var hbr15 = remember { mutableStateOf("") }
-    var hbr25 = remember { mutableStateOf("") }
-    var hbr425 = remember { mutableStateOf("") }
-    var sbw15 = remember { mutableStateOf("") }
-    var sbw25 = remember { mutableStateOf("") }
-    var sbw425 = remember { mutableStateOf("") }
-    var lbb15 = remember { mutableStateOf("") }
-    var lbb25 = remember { mutableStateOf("") }
-    var lbb425 = remember { mutableStateOf("") }
-    var lbbo = remember { mutableStateOf("") }
-    var therapy = remember { mutableStateOf(0) }
+    var timeOn = remember {
+        derivedStateOf{(datetimeFormat.format(timeOnState.value.time))}
+    }
+    var timeOff = remember {
+        derivedStateOf {(datetimeFormat.format(timeOffState.value.time))}
+    }
+    var redBagAmount = remember { mutableStateOf("") }
+    var redBagDext = remember { mutableStateOf("") }
+    var whiteBagDext = remember { mutableStateOf("") }
+    var whiteBagAmount = remember { mutableStateOf("") }
+    var blueBagDext = remember { mutableStateOf("") }
+    var blueBagAmount = remember { mutableStateOf("") }
+    var blueBagType = remember { mutableStateOf("") }
+    // To ensure blueBagType is recorded as "" if "Others" is not selected
+    val blueBagFormatter = remember {
+        derivedStateOf {
+            if (blueBagDext.value == "Others") blueBagType.value else ""
+        }
+    }
+    var therapy = remember { mutableStateOf("") }
     var totalVolume = remember { mutableStateOf("") }
     var targetUF = remember { mutableStateOf("") }
     var therapyTime = remember { mutableStateOf("") }
@@ -135,8 +165,13 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
     LaunchedEffect(totalUF.value, lastFillVol.value, initDrain.value) {
         nettUF.value = calculateNettUF(totalUF.value, lastFillVol.value, initDrain.value)
     }
-
-    //
+    // Auto calculate therapy time
+    LaunchedEffect(timeOffState.value, timeOnState.value) {
+        val diffInMillis = timeOffState.value.timeInMillis - timeOnState.value.timeInMillis
+        val diffInHours = diffInMillis / (1000 * 60 * 60).toFloat() // Difference in hours as a float
+        therapyTime.value = diffInHours.toString()
+    }
+    // Auto calculate treatment hours
     val submitResult by recordViewModel.recordResult.collectAsState()
 
     Column {
@@ -157,11 +192,12 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 )
             }
             item{
+                datePicker(showRecordingDatePicker, recordingDateState)
                 Text(text = "Recording Date", fontSize = 25.sp)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Text(text = recordingDate, fontSize = 25.sp)
+                    Text(text = dateFormat.format(recordingDateState.value.time), fontSize = 25.sp)
                     IconButton(
                         onClick = { showRecordingDatePicker.value = true }
                     ) {
@@ -170,27 +206,36 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 }
             }
             item{
-                textNumberBox(title = "Blood Pressure", variable = bp)
+                textNumberBox(title = "Blood Pressure", variable = bp, tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg")
+
             }
             item{
-                textNumberBox(title = "Heart Rate", variable = hr)
+                textNumberBox(title = "Heart Rate", variable = hr, tooltipMessage = "Heart Rate, measured in BPM")
             }
             item{
-                textNumberBox(title = "Weight", variable = weight)
+                textNumberBox(title = "Weight", variable = weight, tooltipMessage = "Weight, measured in KG")
             }
             item{
-                textNumberBox(title = "Urine Output", variable = uo)
+                textNumberBox(title = "Urine Output", variable = uo, tooltipMessage = "Urine Output, measured in mL")
             }
             item{
                 dateTimePicker(
                     showDatePicker = showTimeOnDatePicker,
-                    onDateSelected = timeOn
+                    cal = timeOnState,
+                    onDateSelected = timeOnSelected
                 )
-                Text(text = "Time on", fontSize = 25.sp)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Text(text = timeOn.value, fontSize = 25.sp)
+                    Text(text = "Time on", fontSize = 25.sp)
+                    Tooltip(message = "Date and Time treatment starts")
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    if(timeOnSelected.value){
+                        Text(text = timeOn.value, fontSize = 25.sp)
+                    }
                     IconButton(
                         onClick = {
                             showTimeOnDatePicker.value = true }
@@ -202,13 +247,21 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
             item{
                 dateTimePicker(
                     showDatePicker = showTimeOffDatePicker,
-                    onDateSelected = timeOff
+                    cal = timeOffState,
+                    onDateSelected = timeOffSelected,
                 )
-                Text(text = "Time off", fontSize = 25.sp)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Text(text = timeOff.value, fontSize = 25.sp)
+                    Text(text = "Time off", fontSize = 25.sp)
+                    Tooltip(message = "Date and Time treatment ends")
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    if(timeOffSelected.value){
+                        Text(text = timeOff.value, fontSize = 25.sp)
+                    }
                     IconButton(
                         onClick = { showTimeOffDatePicker.value = true }
                     ) {
@@ -217,135 +270,246 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 }
             }
             item{
-                Divider(modifier = Modifier.height(2.dp))
+                Divider(modifier = Modifier.height(5.dp))
             }
             item{
-                Text(text = "Heater Bag (Red)", fontSize = 30.sp)
+                Box(
+                    modifier = Modifier
+                        .clickable { showRedBagDropdown = true }
+                        .fillMaxWidth(),
+
+                    //            .clickable { showDropdown = !showDropdown },
+                ) {
+                    OutlinedTextField(
+                        value = redBagDext.value,
+                        onValueChange = { },
+                        label = { Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text("Heater Bag")
+                            Tooltip(message = "Type Of Red Heater Bag used")
+                        } },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusEvent { showRedBagDropdown = it.isFocused },
+                        readOnly = true,
+                        singleLine = true
+                    )
+                    DropdownMenu(
+                        expanded = showRedBagDropdown,
+                        onDismissRequest = { showRedBagDropdown = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        bagDext.forEach { item ->
+                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                                redBagDext.value = item
+                                showRedBagDropdown = false
+                            })
+                        }
+                    }
+                }
             }
             item{
-                textNumberBox(title = "1.5% Dext.(Amount)", variable = hbr15)
+                textNumberBox(title = "Amount", variable = redBagAmount, tooltipMessage = "Amount of Red Heater Bag used")
             }
             item{
-                textNumberBox(title = "2.5% Dext.(Amount)", variable = hbr25)
+                Divider(modifier = Modifier.height(5.dp))
             }
             item{
-                textNumberBox(title = "4.25% Dext.(Amount)", variable = hbr425)
+                Box(
+                    modifier = Modifier
+                        .clickable { showWhiteBagDropdown = true }
+                        .fillMaxWidth(),
+
+                    //            .clickable { showDropdown = !showDropdown },
+                ) {
+                    OutlinedTextField(
+                        value = whiteBagDext.value,
+                        onValueChange = { },
+                        label = { Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text("Supply Bag")
+                            Tooltip(message = "Type of White Supply Bag used")
+                        } },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusEvent { showWhiteBagDropdown = it.isFocused },
+                        readOnly = true,
+                        singleLine = true
+                    )
+                    DropdownMenu(
+                        expanded = showWhiteBagDropdown,
+                        onDismissRequest = { showWhiteBagDropdown = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        bagDext.forEach { item ->
+                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                                whiteBagDext.value = item
+                                showWhiteBagDropdown = false
+                            })
+                        }
+                    }
+                }
             }
             item{
-                Divider(modifier = Modifier.height(2.dp))
+                textNumberBox(title = "Amount", variable = whiteBagAmount, tooltipMessage = "Amount of White Supply Bag used")
             }
             item{
-                Text(text = "Supply Bag (White)", fontSize = 30.sp)
+                Divider(modifier = Modifier.height(5.dp))
             }
             item{
-                textNumberBox(title = "1.5% Dext.(Amount)", variable = sbw15)
+                Box(
+                    modifier = Modifier
+                        .clickable { showBlueBagDropdown = true }
+                        .fillMaxWidth(),
+
+                    //            .clickable { showDropdown = !showDropdown },
+                ) {
+                    OutlinedTextField(
+                        value = blueBagDext.value,
+                        onValueChange = { },
+                        label = { Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text("Last Bag")
+                            Tooltip(message = "Type of Blue Last Bag used")
+                        } },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusEvent { showBlueBagDropdown = it.isFocused },
+                        readOnly = true,
+                        singleLine = true
+                    )
+                    DropdownMenu(
+                        expanded = showBlueBagDropdown,
+                        onDismissRequest = { showBlueBagDropdown = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        blueDext.forEach { item ->
+                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                                blueBagDext.value = item
+                                showBlueBagDropdown = false
+                            })
+                        }
+                    }
+                }
+            }
+            if (blueBagDext.value == "Others"){
+                item{
+                    textNumberBox(title = "Type (Others)", variable = blueBagType, tooltipMessage = "If Others, state the type")
+                }
             }
             item{
-                textNumberBox(title = "2.5% Dext.(Amount)", variable = sbw25)
-            }
-            item{
-                textNumberBox(title = "4.25% Dext.(Amount)", variable = sbw425)
-            }
-            item{
-                Divider(modifier = Modifier.height(2.dp))
-            }
-            item{
-                Text(text = "Last Bag (Blue)", fontSize = 30.sp)
-            }
-            item{
-                textNumberBox(title = "1.5% Dext.(Amount)", variable = lbb15)
-            }
-            item{
-                textNumberBox(title = "2.5% Dext.(Amount)", variable = lbb25)
-            }
-            item{
-                textNumberBox(title = "4.25% Dext.(Amount)", variable = lbb425)
-            }
-            item{
-                textNumberBox(title = "Others", variable = lbbo)
+                textNumberBox(title = "Amount", variable = blueBagAmount, tooltipMessage = "Amount of Blue Last Bag used")
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
             }
             item{
                 //textNumberBox(title = "Type of Therapy", variable = therapy, numeric = false)
-                Text(text = "Therapy Type", fontSize = 25.sp)
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFEFB8C8))
                         .clickable { showTherapyDropdown = true }
                         .fillMaxWidth(),
 
     //            .clickable { showDropdown = !showDropdown },
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                    OutlinedTextField(
+                        value = therapy.value,
+                        onValueChange = { },
+                        label = { Text("Therapy Type") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp)
-
-                    ){
-                        Text(text = therapyItems[therapy.value], modifier = Modifier.padding(3.dp))
-                        Icon(Icons.Filled.ArrowDownward, contentDescription = "Dropdown")
-                    }
-
-                }
-                DropdownMenu(
-                    expanded = showTherapyDropdown,
-                    onDismissRequest = { showTherapyDropdown = false },
-                ) {
-                    therapyItems.forEachIndexed { index, s ->
-                        DropdownMenuItem(
-                          text = {Text(text = s)}  ,
-                            onClick = {
-                                therapy.value = index
+                            .onFocusEvent { showTherapyDropdown = it.isFocused },
+                        readOnly = true,
+                        singleLine = true
+                    )
+                    DropdownMenu(
+                        expanded = showTherapyDropdown,
+                        onDismissRequest = { showTherapyDropdown = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        therapyItems.forEach { item ->
+                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                                therapy.value = item
                                 showTherapyDropdown = false
-                            }
-                        )
+                            })
+                        }
                     }
                 }
             }
             item{
-                textNumberBox(title = "Total Volume", variable = totalVolume)
+                textNumberBox(title = "Total Volume", variable = totalVolume, tooltipMessage = "Volume of <>, measured in mL")
             }
             item{
-                textNumberBox(title = "Target UF for Tidal (If applicable)", variable = targetUF, numeric = false)
+                textNumberBox(title = "Target UF for Tidal (If applicable)", variable = targetUF, numeric = false, tooltipMessage = "If not applicable, leave this field empty")
             }
             item{
-                textNumberBox(title = "Therapy Time (In Hours)", variable = therapyTime)
+                textNumberBox(title = "Therapy Time", variable = therapyTime, tooltipMessage = "Total duration of treatment, measured in Hours")
             }
             item{
-                textNumberBox(title = "Fill Volume (In mL)", variable = fillVol)
+                textNumberBox(title = "Fill Volume", variable = fillVol, tooltipMessage = "Measured in mL")
             }
             item{
-                textNumberBox(title = "Last Fill Volume (In mL)", variable = lastFillVol)
+                textNumberBox(title = "Last Fill Volume", variable = lastFillVol, tooltipMessage = "Measured in mL")
             }
             item{
-                textNumberBox(title = "Dextrose % Conc", variable = dextCon, numeric = false)
+                textNumberBox(title = "Dextrose % Conc", variable = dextCon, numeric = false, tooltipMessage = "% concentration od Dextrose used")
             }
             item{
                 textNumberBox(title = "No. of Cycles", variable = cycles)
             }
             item{
-                textNumberBox(title = "Initial Drain", variable = initDrain)
+                textNumberBox(title = "Initial Drain", variable = initDrain, tooltipMessage = "Measured in mL")
             }
             item{
-                textNumberBox(title = "Average Dwell Time", variable = avgDwellTime)
+                textNumberBox(title = "Average Dwell Time", variable = avgDwellTime, tooltipMessage = "Measured in Hours")
             }
             item{
-                textNumberBox(title = "Color of Drainage", variable = colorDrain)
+                Box(
+                    modifier = Modifier
+                        .clickable { showColorDropdown = true }
+                        .fillMaxWidth(),
+
+                    //            .clickable { showDropdown = !showDropdown },
+                ) {
+                    OutlinedTextField(
+                        value = colorDrain.value,
+                        onValueChange = { },
+                        label = { Text("Colour of Drainage") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusEvent { showColorDropdown = it.isFocused },
+                        readOnly = true,
+                        singleLine = true
+                    )
+                    DropdownMenu(
+                        expanded = showColorDropdown,
+                        onDismissRequest = { showColorDropdown = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        dischargeColor.forEach { item ->
+                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                                colorDrain.value = item
+                                showColorDropdown = false
+                            })
+                        }
+                    }
+
+                }
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
             }
             item{
-                textNumberBox(title = "Total UF (In mL)", variable = totalUF)
+                textNumberBox(title = "Total UF", variable = totalUF, tooltipMessage = "Measured in mL")
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
             }
             item{
-                textNumberBox(title = "Nett UF (In mL)", variable = nettUF)
+                textNumberBox(title = "Nett UF", variable = nettUF, tooltipMessage = "Measured in mL")
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
@@ -361,12 +525,11 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                     Button(onClick = { recordViewModel.submitRecord(
                         usernameText,listOf(
                              recordingDate, bp.value, hr.value, weight.value, uo.value,
-                            timeOn.value, timeOff.value, hbr15.value, hbr25.value, hbr425.value,
-                            sbw15.value, sbw25.value, sbw425.value, lbb15.value, lbb25.value,
-                            lbb425.value, lbbo.value, therapyItems[therapy.value], totalVolume.value,
-                            targetUF.value, therapyTime.value, fillVol.value, lastFillVol.value,
-                            dextCon.value, cycles.value, initDrain.value, avgDwellTime.value,
-                            colorDrain.value, totalUF.value, nettUF.value, remarks.value)
+                            timeOn.value, timeOff.value, redBagDext.value, redBagAmount.value, whiteBagDext.value,
+                            whiteBagAmount.value, blueBagDext.value, blueBagAmount.value, blueBagFormatter.value, therapy.value,
+                            totalVolume.value, targetUF.value, therapyTime.value, fillVol.value, lastFillVol.value,
+                            dextCon.value, cycles.value, initDrain.value, avgDwellTime.value, colorDrain.value,
+                            totalUF.value, nettUF.value, remarks.value)
                     ) }) {
                         Text(text = "Submit")
                     }
@@ -399,45 +562,47 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
     }
 
     // Date Picker
-    if (showRecordingDatePicker.value) {
-        DatePickerDialog(
-            onDismissRequest = { showRecordingDatePicker.value = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val selectedDateMillis = datePickerState.selectedDateMillis
-                        if (selectedDateMillis != null) {
-                            recordingDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDateMillis))
-                        }
-                        showRecordingDatePicker.value = false
-                              },
-                    enabled = datePickerState.selectedDateMillis != null
-                ) {
-                    Text(text = "Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRecordingDatePicker.value = false }) {
-                    Text(text = "Dismiss")
-                }
-            }) {
-            //Setting the selected date
-            DatePicker(state = datePickerState)
-        }
-    }
+//    if (showRecordingDatePicker.value) {
+//        DatePickerDialog(
+//            onDismissRequest = { showRecordingDatePicker.value = false },
+//            confirmButton = {
+//                TextButton(
+//                    onClick = {
+//                        val selectedDateMillis = datePickerState.selectedDateMillis
+//                        if (selectedDateMillis != null) {
+//                            recordingDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDateMillis))
+//                        }
+//                        showRecordingDatePicker.value = false
+//                              },
+//                    enabled = datePickerState.selectedDateMillis != null
+//                ) {
+//                    Text(text = "Confirm")
+//                }
+//            },
+//            dismissButton = {
+//                TextButton(onClick = { showRecordingDatePicker.value = false }) {
+//                    Text(text = "Dismiss")
+//                }
+//            }) {
+//            //Setting the selected date
+//            DatePicker(state = datePickerState)
+//        }
+//    }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun dateTimePicker(
     showDatePicker: MutableState<Boolean>,
-    onDateSelected: MutableState<String>
+    cal: MutableState<Calendar>,
+    onDateSelected: MutableState<Boolean>
 ){
     val datePickerState = rememberDatePickerState()
     val timePickerState = rememberTimePickerState()
     var datePicker by remember { mutableStateOf(true) }
     var timePicker by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf("") }
+
     if (showDatePicker.value) {
         if (datePicker){
             DatePickerDialog(
@@ -447,8 +612,15 @@ fun dateTimePicker(
                         onClick = {
                             val selectedDateMillis = datePickerState.selectedDateMillis
                             if (selectedDateMillis != null) {
-                                //onDateSelected.value = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDateMillis))
-                                selectedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDateMillis))
+                                val selectedDate = Calendar.getInstance().apply {
+                                    timeInMillis = selectedDateMillis
+                                }
+                                val updatedCal = (cal.value.clone() as Calendar).apply {
+                                    set(Calendar.YEAR, selectedDate.get(Calendar.YEAR))
+                                    set(Calendar.MONTH, selectedDate.get(Calendar.MONTH))
+                                    set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH))
+                                }
+                                cal.value = updatedCal
                             }
                             //showDatePicker.value = false
                             datePicker = false
@@ -474,14 +646,13 @@ fun dateTimePicker(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            val selectedTimeHour = timePickerState.hour
-                            val selectedTimeMin = timePickerState.minute
-
-                            if (selectedTimeHour != null && selectedTimeMin != null) {
-                                onDateSelected.value = selectedDate + " " + selectedTimeHour.toString() + ":" + selectedTimeMin
-
-                                //selectedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDateMillis))
+                            val updatedCal = (cal.value.clone() as Calendar).apply {
+                                set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                set(Calendar.MINUTE, timePickerState.minute)
+                                set(Calendar.SECOND, 0)
                             }
+                            cal.value = updatedCal
+                            onDateSelected.value = true
                             datePicker = true
                             timePicker = false
                             showDatePicker.value = false
@@ -499,6 +670,50 @@ fun dateTimePicker(
             ) {
                     TimePicker(state = timePickerState)
                 }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun datePicker(
+    showDatePicker: MutableState<Boolean>,
+    cal: MutableState<Calendar>,
+){
+    val datePickerState = rememberDatePickerState(selectableDates = PastOrPresentSelectableDates)
+    var datePicker by remember { mutableStateOf(true) }
+    if (showDatePicker.value) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker.value = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val selectedDateMillis = datePickerState.selectedDateMillis
+                        if (selectedDateMillis != null) {
+                            val selectedDate = Calendar.getInstance().apply {
+                                timeInMillis = selectedDateMillis
+                            }
+                            val updatedCal = (cal.value.clone() as Calendar).apply {
+                                set(Calendar.YEAR, selectedDate.get(Calendar.YEAR))
+                                set(Calendar.MONTH, selectedDate.get(Calendar.MONTH))
+                                set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH))
+                            }
+                            cal.value = updatedCal
+                        }
+                        datePicker = false
+                        showDatePicker.value = false
+                    },
+                ) {
+                    Text(text = "Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker.value = false }) {
+                    Text(text = "Dismiss")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
@@ -556,15 +771,17 @@ fun TimePickerDialog(
     }
 }
 
+
+
 @Composable
 fun textNumberBox(
     title : String,
     variable : MutableState<String>,
-    numeric: Boolean = true
+    numeric: Boolean = true,
+    tooltipMessage: String = ""
 ){
-    Text(text = title, fontSize = 25.sp)
     if(numeric){
-        TextField(
+        OutlinedTextField(
             value = variable.value,
             onValueChange = {newText ->
                 val regex = Regex("^[0-9]*\\.?[0-9]*$")
@@ -572,15 +789,67 @@ fun textNumberBox(
                     variable.value = newText
                 }
             },
+            label = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(title)
+                    if (tooltipMessage.isNotEmpty()) {
+                        Tooltip(message = tooltipMessage)
+                    }
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
     }else{
-        TextField(
+        OutlinedTextField(
             value = variable.value,
             onValueChange = { variable.value = it },
-            modifier = Modifier.fillMaxWidth()
+            label = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(title)
+                    if (tooltipMessage.isNotEmpty()) {
+                        Tooltip(message = tooltipMessage)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Tooltip(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+
+    val state = rememberTooltipState()
+    val scope = rememberCoroutineScope()
+
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        tooltip = {
+            RichTooltip(
+//                title = { Text("Smart Cycle") },
+                text = { Text(message) })
+        },
+        state = state)
+    {
+        IconButton(onClick = {
+            scope.launch {
+                state.show(MutatePriority.Default)
+            }
+        }) {
+            Icon(Icons.Default.Info, contentDescription = "info")
+        }
+
     }
 
 }
@@ -595,4 +864,9 @@ fun calculateNettUF(totalUF: String, fillVol: String, initDrain: String): String
     } else {
         ""
     }
+}
+
+fun formatDateTime(calendar: Calendar): String {
+    val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return format.format(calendar.time)
 }

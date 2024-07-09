@@ -60,7 +60,7 @@ fun NewNotificationScreenContent(navController: NavController){
     val notificationViewModel: NotificationViewModel = hiltViewModel()
 
     // Time picker
-    val calendarState = remember { mutableStateOf(Calendar.getInstance()) } // Time in milliseconds from now
+    val calendarState = remember { mutableStateOf(Calendar.getInstance()) }
     val timeState = remember{ mutableStateOf(false)}
     val showTimePicker = remember { mutableStateOf(false) }
     val dateSelected = remember { mutableStateOf(false)}
