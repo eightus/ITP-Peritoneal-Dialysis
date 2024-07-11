@@ -69,4 +69,16 @@ class FirebaseAuthDataSource @Inject constructor() : AuthDataSource {
             Result.Failure(e)
         }
     }
+
+    override suspend fun getIdToken(): Result<String?> {
+        return try {
+            val user = auth.currentUser
+            val idToken = user?.getIdToken(true)?.await()?.token
+            Result.Success(idToken)
+        } catch (e: Exception) {
+            Log.d("getIdToken", "Error")
+            e.message?.let { Log.d("getIdToken", it) }
+            Result.Failure(e)
+        }
+    }
 }

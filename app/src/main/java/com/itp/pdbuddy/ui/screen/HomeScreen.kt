@@ -1,5 +1,8 @@
 package com.itp.pdbuddy.ui.screen
 
+import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,12 +21,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,13 +44,22 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
+import com.itp.pdbuddy.ui.viewmodel.NetworkViewModel
 import com.itp.pdbuddy.utils.Result
+import android.util.Base64
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 
 @Composable
 fun HomeScreen(navController: NavController) {
     val authViewModel: AuthViewModel = hiltViewModel()
     val username by authViewModel.username.collectAsState()
-    authViewModel.fetchUsername()
+    LaunchedEffect(Unit) {
+        authViewModel.fetchUsername()
+
+    }
     HomeScreenContent(navController = navController, username = username)
 }
 
@@ -74,10 +92,11 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
         is Result.Success -> "Welcome back,\n${(username).data ?: "User"}"
         is Result.Failure -> "Failed to fetch username"
     }
-
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background) // Light background color
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.Start
@@ -165,6 +184,10 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             content = "There will be a system maintenance on June 25, 2024.",
             icon = Icons.AutoMirrored.Filled.Announcement // Replace with an appropriate icon
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        // Weight Graph
+        WeightGraph()
     }
 }
 
@@ -230,6 +253,95 @@ fun SectionCard(title: String, content: String, icon: ImageVector) {
         }
     }
 }
+
+@Composable
+fun WeightGraph() {
+    val networkViewModel: NetworkViewModel = hiltViewModel()
+    var base64Image by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var isError by remember { mutableStateOf(false) }
+
+    fun fetchGraph() {
+        isLoading = true
+        isError = false
+        networkViewModel.fetchGraph { result ->
+            when (result) {
+                is Result.Success -> {
+                    base64Image = result.data["image"] as? String
+                    isLoading = false
+                }
+                is Result.Failure -> {
+                    isLoading = false
+                    isError = true
+                }
+                is Result.Loading -> {
+                    isLoading = true
+                    isError = false
+                }
+                is Result.Idle -> {
+                    isLoading = false
+                    isError = false
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        fetchGraph()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+            isError -> {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Failed to load",
+                        color = Color.Red,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Button(onClick = { fetchGraph() }) {
+                        Text("Retry")
+                    }
+                }
+            }
+            base64Image != null -> {
+                val imageBytes = Base64.decode(base64Image, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                Column {
+                    Text(
+                        text = "Weight Graph",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Weight Graph",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
 
 data class ProfileItem(val icon: ImageVector, val label: String, val click: () -> Unit)
 

@@ -1,6 +1,7 @@
 [versions]
 agp = "8.5.0"
 composeBomVersion = "2023.08.00"
+converterGson = "2.9.0"
 core = "1.5.0"
 daggerCompiler = "2.48.1"
 firebaseAuth = "23.0.0"
@@ -8,6 +9,7 @@ firebaseAuthVersion = "22.3.1"
 firebaseFirestore = "25.0.0"
 firebaseFirestoreVersion = "24.10.3"
 googleServices = "4.4.2"
+gson = "2.10.1"
 hiltAndroid = "2.50"
 hiltNavigationCompose = "1.2.0"
 kotlin = "1.9.0"
@@ -22,6 +24,7 @@ composeBom = "2024.04.01"
 materialIconsExtended = "1.6.8"
 mockk = "1.13.10"
 navigationCompose = "2.7.7"
+retrofit = "2.9.0"
 robolectric = "4.11.1"
 roomCompiler = "2.6.1"
 roomKtx = "2.6.1"
@@ -47,12 +50,14 @@ androidx-rules = { module = "androidx.test:rules", version.ref = "core" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "daggerCompiler" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-auth-v2231 = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-firestore-v24103 = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestoreVersion" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "daggerCompiler" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroid" }
@@ -71,6 +76,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 

@@ -27,4 +27,8 @@ class AuthRepository @Inject constructor(
     suspend fun updateDisplayName(displayName: String): Result<Boolean> {
         return authDataSource.updateDisplayName(displayName)
     }
+
+    suspend fun getIdToken(): Result<String?> {
+        return authDataSource.getIdToken()
+    }
 }

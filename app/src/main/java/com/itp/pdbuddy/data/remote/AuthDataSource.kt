@@ -8,4 +8,5 @@ interface AuthDataSource {
     suspend fun isLoggedIn(): Result<Boolean>
     suspend fun getUsername(): Result<String?>
     suspend fun updateDisplayName(displayName: String): Result<Boolean>
+    suspend fun getIdToken(): Result<String?>
 }

@@ -1,5 +1,6 @@
 package com.itp.pdbuddy.di
 
+import com.itp.pdbuddy.BuildConfig
 import android.content.Context
 import androidx.room.Room
 import com.itp.pdbuddy.data.remote.AuthDataSource
@@ -10,6 +11,7 @@ import com.itp.pdbuddy.data.remote.api.ExternalAPIDataSource
 import com.itp.pdbuddy.data.remote.APIDataSource
 import com.itp.pdbuddy.data.remote.NotificationDAO
 import com.itp.pdbuddy.data.remote.PrescriptionDataSource
+import com.itp.pdbuddy.data.remote.api.ApiService
 import com.itp.pdbuddy.data.remote.database.NotificationRoomDatabase
 import com.itp.pdbuddy.data.remote.firebase.FirebasePrescriptionDataSource
 import dagger.Binds
@@ -18,6 +20,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 
@@ -66,4 +70,21 @@ abstract class AuthModule {
         fun provideWordDao(database: NotificationRoomDatabase): NotificationDAO = database.notificationDAO()
 
     }
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object RetrofitModule {
+        @Provides
+        @Singleton
+        fun provideRetrofit(): Retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        @Provides
+        @Singleton
+        fun provideApiService(retrofit: Retrofit): ApiService = retrofit.create((ApiService::class.java))
+    }
 }
+
+
