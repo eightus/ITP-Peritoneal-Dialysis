@@ -3,21 +3,20 @@ package com.itp.pdbuddy.data.remote.firebase
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.itp.pdbuddy.data.model.Prescription
 import com.itp.pdbuddy.data.remote.RecordDataSource
 import com.itp.pdbuddy.utils.Result
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class FirebaseRecordDataSource @Inject constructor(): RecordDataSource{
+class FirebaseRecordDataSource @Inject constructor(): RecordDataSource {
 
     private val db = FirebaseFirestore.getInstance()
 
     override suspend fun getRecords(name: String): Result<List<Map<String, Any>>> {
         return try {
-            val querySnapshot = db.collection("Records")
+            val querySnapshot = db.collection("Record")
                 .whereEqualTo("Name", name)
-                .orderBy("dateTime", Query.Direction.DESCENDING)
+                .orderBy("RecordDate", Query.Direction.DESCENDING)
                 .get()
                 .await()
             val records = querySnapshot.documents.map { documentSnapshot ->
@@ -30,6 +29,7 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource{
             Result.Failure(e)
         }
     }
+
     override suspend fun submitRecord(name: String, data: List<Any>): Result<Boolean> {
         Log.d("Record", data.toString())
         return try {
@@ -67,7 +67,7 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource{
                 "Nett UF" to data[29],
                 "Remarks" to data[30]
             )
-            db.collection("Record").document()
+            db.collection("Records").document()
                 .set(record)
                 .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully written!") }
                 .addOnFailureListener { e -> Log.w("TAG", "Error writing document", e) }
@@ -79,5 +79,4 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource{
             Result.Failure(e)
         }
     }
-
 }
