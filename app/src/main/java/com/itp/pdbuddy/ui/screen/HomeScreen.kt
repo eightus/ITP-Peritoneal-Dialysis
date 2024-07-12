@@ -79,7 +79,7 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             navController.navigate("resources")
         },
         ProfileItem(Icons.TwoTone.History, "History") {
-            navController.navigate("home")
+            navController.navigate("history")
         },
         ProfileItem(Icons.TwoTone.Notifications, "Reminders") {
             navController.navigate("setNotification")

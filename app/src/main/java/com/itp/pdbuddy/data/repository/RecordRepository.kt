@@ -11,6 +11,10 @@ class RecordRepository @Inject constructor(
 
 ) {
 
+    suspend fun getRecords(name: String): Result<List<Map<String, Any>>> {
+        return recordDataSource.getRecords(name)
+    }
+
     suspend fun submitRecord(name: String, data: List<Any>): Result<Boolean> {
         return recordDataSource.submitRecord(name, data)
     }

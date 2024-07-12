@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.itp.pdbuddy.data.repository.Resource
+import com.itp.pdbuddy.ui.History.HistoryScreen
 import com.itp.pdbuddy.ui.screen.AdditionalMaterialScreen
 import com.itp.pdbuddy.ui.screen.CartSuppliesScreen
 import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
@@ -90,6 +91,12 @@ object NavigationConfig {
             title = "record",
             icon = Icons.Default.Person,
             screen = { navController -> RecordScreen(navController = navController) }
+        ),
+        NavItem(
+          route = "history",
+            title = "History",
+            icon = Icons.Default.History,
+            screen = { navController -> HistoryScreen(navController = navController)}
         ),
         NavItem(
             route = "manualrecord",
@@ -242,7 +249,7 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
 
-    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "home", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
 //    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {

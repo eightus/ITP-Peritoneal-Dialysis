@@ -2,14 +2,34 @@ package com.itp.pdbuddy.data.remote.firebase
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.itp.pdbuddy.data.model.Prescription
 import com.itp.pdbuddy.data.remote.RecordDataSource
 import com.itp.pdbuddy.utils.Result
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FirebaseRecordDataSource @Inject constructor(): RecordDataSource{
 
     private val db = FirebaseFirestore.getInstance()
 
+    override suspend fun getRecords(name: String): Result<List<Map<String, Any>>> {
+        return try {
+            val querySnapshot = db.collection("Records")
+                .whereEqualTo("Name", name)
+                .orderBy("dateTime", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            val records = querySnapshot.documents.map { documentSnapshot ->
+                documentSnapshot.data ?: emptyMap()
+            }
+
+            Result.Success(records)
+        } catch (e: Exception) {
+            Log.e("FirebaseRecord", "Error fetching all record", e)
+            Result.Failure(e)
+        }
+    }
     override suspend fun submitRecord(name: String, data: List<Any>): Result<Boolean> {
         Log.d("Record", data.toString())
         return try {
