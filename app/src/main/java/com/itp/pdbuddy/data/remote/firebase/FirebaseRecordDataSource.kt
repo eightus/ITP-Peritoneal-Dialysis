@@ -67,7 +67,7 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource {
                 "Nett UF" to data[29],
                 "Remarks" to data[30]
             )
-            db.collection("Records").document()
+            db.collection("Record").document()
                 .set(record)
                 .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully written!") }
                 .addOnFailureListener { e -> Log.w("TAG", "Error writing document", e) }
