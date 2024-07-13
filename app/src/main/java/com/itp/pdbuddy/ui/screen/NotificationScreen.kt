@@ -98,7 +98,7 @@ fun NotificationScreenContent(navController: NavController){
                             ){
                                 Text(notification.time)
                                 Text(notification.date)
-                                Text(notification.type)
+                                Text("${notification.type} ${notification.medication} ${notification.quantity}${notification.unit}" )
                             }
                             IconButton(
                                 modifier = Modifier.align(Alignment.CenterVertically),

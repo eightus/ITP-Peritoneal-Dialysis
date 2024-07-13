@@ -15,7 +15,7 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource{
         return try {
             val record = hashMapOf(
                 "Name" to name,
-                "Record Date" to data[0],
+                "RecordDate" to data[0],
                 "Blood Pressure" to data[1],
                 "Heart Rate" to data[2],
                 "Weight" to data[3],

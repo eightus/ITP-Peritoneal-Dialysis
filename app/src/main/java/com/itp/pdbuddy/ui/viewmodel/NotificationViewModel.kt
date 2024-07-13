@@ -6,11 +6,10 @@ import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itp.pdbuddy.data.remote.table.Notification
+import com.itp.pdbuddy.data.model.Notification
 import com.itp.pdbuddy.data.repository.NotificationRepository
 import com.itp.pdbuddy.service.NotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,7 +43,10 @@ class NotificationViewModel @Inject constructor(
 
     fun createNotification(
         calenderState: MutableState<Calendar>,
-        notificationType: String
+        notificationType: String,
+        medicine: String,
+        quantity: String,
+        unit: String
     ){
         val currentCalender = Calendar.getInstance()
         var date: String = "None"
@@ -62,7 +64,7 @@ class NotificationViewModel @Inject constructor(
             if (currentCalender.after(calenderState.value)){
                 calenderState.value.add(Calendar.DAY_OF_YEAR, 1)
             }
-            message = "It is time to take your medication"
+            message = "It is time to take your medication: ${medicine} ${quantity}${unit}"
             date = "Recurring"
             time = SimpleDateFormat("hh:mm a").format(calenderState.value.time)
         }
@@ -86,12 +88,15 @@ class NotificationViewModel @Inject constructor(
                     Notification(
                         date = date,
                         time = time,
-                        type = notificationType
+                        type = notificationType,
+                        medication = medicine,
+                        quantity = quantity,
+                        unit = unit
                     )
                 )
                 val id: List<Int>
                 withContext(Dispatchers.IO){
-                    id = notificationRepository.getId(time, date, notificationType)
+                    id = notificationRepository.getId(time, date, notificationType, medicine)
                 }
                 Log.d(id.first().toString(), id.toString())
                 if(notificationType == "Medication"){

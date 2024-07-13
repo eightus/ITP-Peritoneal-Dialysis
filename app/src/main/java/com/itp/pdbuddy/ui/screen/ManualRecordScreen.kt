@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -36,6 +38,7 @@ import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -54,6 +57,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +85,7 @@ fun ManualRecordScreen(navController: NavController) {
     ManualRecordScreenContent(navController = navController, username = username)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualRecordScreenContent(navController: NavController, username: Result<String?>) {
     val recordViewModel: RecordViewModel = hiltViewModel()
@@ -94,11 +99,11 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
     val timeOffState = remember { mutableStateOf(Calendar.getInstance()) }
     val timeOnSelected = remember{ mutableStateOf(false)}
     val timeOffSelected = remember{ mutableStateOf(false)}
-    var showTherapyDropdown by remember { mutableStateOf(false) }
-    var showColorDropdown by remember { mutableStateOf(false) }
-    var showRedBagDropdown by remember { mutableStateOf(false) }
-    var showWhiteBagDropdown by remember { mutableStateOf(false) }
-    var showBlueBagDropdown by remember { mutableStateOf(false) }
+    val showTherapyDropdown = remember { mutableStateOf(false) }
+    val showColorDropdown = remember { mutableStateOf(false) }
+    val showRedBagDropdown = remember { mutableStateOf(false) }
+    val showWhiteBagDropdown = remember { mutableStateOf(false) }
+    val showBlueBagDropdown = remember { mutableStateOf(false) }
 
     // Dropdown items
     val therapyItems = listOf("CAPD", "APD")
@@ -227,7 +232,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Text(text = "Time on", fontSize = 25.sp)
+                    Text(text = "Treatment Start Time", fontSize = 25.sp)
                     Tooltip(message = "Date and Time treatment starts")
                 }
                 Row(
@@ -253,7 +258,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Text(text = "Time off", fontSize = 25.sp)
+                    Text(text = "Treatment End Time", fontSize = 25.sp)
                     Tooltip(message = "Date and Time treatment ends")
                 }
                 Row(
@@ -273,41 +278,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Divider(modifier = Modifier.height(5.dp))
             }
             item{
-                Box(
-                    modifier = Modifier
-                        .clickable { showRedBagDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = redBagDext.value,
-                        onValueChange = { },
-                        label = { Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            Text("Heater Bag")
-                            Tooltip(message = "Type Of Red Heater Bag used")
-                        } },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showRedBagDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showRedBagDropdown,
-                        onDismissRequest = { showRedBagDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        bagDext.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                redBagDext.value = item
-                                showRedBagDropdown = false
-                            })
-                        }
-                    }
-                }
+                dropdownBox(title = "Heater Bag", variable = redBagDext, showDropdown = showRedBagDropdown, dropdownItems = bagDext, tooltipMessage = "Type Of Red Heater Bag used")
             }
             item{
                 textNumberBox(title = "Amount", variable = redBagAmount, tooltipMessage = "Amount of Red Heater Bag used")
@@ -316,41 +287,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Divider(modifier = Modifier.height(5.dp))
             }
             item{
-                Box(
-                    modifier = Modifier
-                        .clickable { showWhiteBagDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = whiteBagDext.value,
-                        onValueChange = { },
-                        label = { Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            Text("Supply Bag")
-                            Tooltip(message = "Type of White Supply Bag used")
-                        } },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showWhiteBagDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showWhiteBagDropdown,
-                        onDismissRequest = { showWhiteBagDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        bagDext.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                whiteBagDext.value = item
-                                showWhiteBagDropdown = false
-                            })
-                        }
-                    }
-                }
+                dropdownBox(title = "Supply Bag", variable = whiteBagDext, showDropdown = showWhiteBagDropdown, dropdownItems = bagDext, tooltipMessage = "Type of White Supply Bag used")
             }
             item{
                 textNumberBox(title = "Amount", variable = whiteBagAmount, tooltipMessage = "Amount of White Supply Bag used")
@@ -359,41 +296,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Divider(modifier = Modifier.height(5.dp))
             }
             item{
-                Box(
-                    modifier = Modifier
-                        .clickable { showBlueBagDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = blueBagDext.value,
-                        onValueChange = { },
-                        label = { Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            Text("Last Bag")
-                            Tooltip(message = "Type of Blue Last Bag used")
-                        } },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showBlueBagDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showBlueBagDropdown,
-                        onDismissRequest = { showBlueBagDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        blueDext.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                blueBagDext.value = item
-                                showBlueBagDropdown = false
-                            })
-                        }
-                    }
-                }
+                dropdownBox(title = "Last Bag", variable = blueBagDext, showDropdown = showBlueBagDropdown, dropdownItems = blueDext, tooltipMessage = "Type of Blue Last Bag used")
             }
             if (blueBagDext.value == "Others"){
                 item{
@@ -408,36 +311,12 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
             }
             item{
                 //textNumberBox(title = "Type of Therapy", variable = therapy, numeric = false)
-                Box(
-                    modifier = Modifier
-                        .clickable { showTherapyDropdown = true }
-                        .fillMaxWidth(),
-
-    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = therapy.value,
-                        onValueChange = { },
-                        label = { Text("Therapy Type") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showTherapyDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showTherapyDropdown,
-                        onDismissRequest = { showTherapyDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        therapyItems.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                therapy.value = item
-                                showTherapyDropdown = false
-                            })
-                        }
-                    }
-                }
+                dropdownBox(
+                    title = "Therapy Type",
+                    variable = therapy,
+                    showDropdown = showTherapyDropdown,
+                    dropdownItems = therapyItems,
+                )
             }
             item{
                 textNumberBox(title = "Total Volume", variable = totalVolume, tooltipMessage = "Volume of <>, measured in mL")
@@ -467,37 +346,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 textNumberBox(title = "Average Dwell Time", variable = avgDwellTime, tooltipMessage = "Measured in Hours")
             }
             item{
-                Box(
-                    modifier = Modifier
-                        .clickable { showColorDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = colorDrain.value,
-                        onValueChange = { },
-                        label = { Text("Colour of Drainage") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showColorDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showColorDropdown,
-                        onDismissRequest = { showColorDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        dischargeColor.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                colorDrain.value = item
-                                showColorDropdown = false
-                            })
-                        }
-                    }
-
-                }
+                dropdownBox(title = "Colour of Drainage", variable = colorDrain, showDropdown = showColorDropdown, dropdownItems = dischargeColor)
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
@@ -509,7 +358,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Divider(modifier = Modifier.height(2.dp))
             }
             item{
-                textNumberBox(title = "Nett UF", variable = nettUF, tooltipMessage = "Measured in mL")
+                textNumberBox(title = "Nett UF", variable = nettUF, tooltipMessage = "Measured in mL, calculated using Nett UF = (Initial Drain - Last Fill Volume) + Total UF")
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
@@ -820,6 +669,70 @@ fun textNumberBox(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun dropdownBox(
+    title: String,
+    variable: MutableState<String>,
+    showDropdown: MutableState<Boolean>,
+    dropdownItems: List<String>,
+    tooltipMessage: String = ""
+
+    ){
+    Box(
+        modifier = Modifier
+            .clickable { showDropdown.value = true }
+            .fillMaxWidth(),
+
+        //            .clickable { showDropdown = !showDropdown },
+    ) {
+        OutlinedTextField(
+            value = variable.value,
+            onValueChange = { },
+            label = { Row(
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(title)
+                if (tooltipMessage.isNotEmpty()) {
+                    Tooltip(message = tooltipMessage)
+                }
+            } },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showDropdown.value = !showDropdown.value },
+            readOnly = true,
+            singleLine = true,
+            enabled = false,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+            trailingIcon = {
+                if (showDropdown.value){
+                    Icon(Icons.Filled.ArrowDropUp,"contentDescription")
+                } else {
+                    Icon(Icons.Filled.ArrowDropDown,"contentDescription")
+                }
+            }
+        )
+        DropdownMenu(
+            expanded = showDropdown.value,
+            onDismissRequest = { showDropdown.value = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            dropdownItems.forEach { item ->
+                DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                    variable.value = item
+                    showDropdown.value = false
+                })
+            }
+        }
     }
 }
 

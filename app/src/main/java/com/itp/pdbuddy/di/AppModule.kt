@@ -59,7 +59,7 @@ abstract class AuthModule {
                 context,
                 NotificationRoomDatabase::class.java,
                 "notification_database.db"
-            ).build()
+            ).fallbackToDestructiveMigration().build()
         }
 
         @Provides
