@@ -73,7 +73,7 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
             navController.navigate("prescription")
         },
         ProfileItem(Icons.TwoTone.Flight, "Travel") {
-            navController.navigate("travel")
+            navController.navigate("travelMain")
         },
         ProfileItem(Icons.AutoMirrored.TwoTone.MenuBook, "Resources") {
             navController.navigate("resources")

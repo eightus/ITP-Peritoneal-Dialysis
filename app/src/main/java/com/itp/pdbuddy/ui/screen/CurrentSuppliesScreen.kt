@@ -119,7 +119,8 @@ val supplyImageMap = mapOf(
     "syringes" to R.drawable.syringes,
     "tapeanddressings" to R.drawable.tapeanddressings,
     "transfersets" to R.drawable.transfersets,
-    "wastedisposalbags" to R.drawable.wastedisposalbags
+    "wastedisposalbags" to R.drawable.wastedisposalbags,
+    "apdmachine" to R.drawable.apdmachine
 )
 
 @Composable

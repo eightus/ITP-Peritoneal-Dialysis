@@ -1,8 +1,10 @@
 package com.itp.pdbuddy.data.repository
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.itp.pdbuddy.ui.screen.Clinic
 import com.itp.pdbuddy.ui.screen.SupplyRequest
+import com.itp.pdbuddy.ui.viewmodel.TravelRequestViewModel.PastRequest
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -47,17 +49,22 @@ class TravelRepository @Inject constructor() {
         hotelAddress: String,
         travelDates: String,
         supplyRequests: List<SupplyRequest>,
-        username: String? // Add username as a parameter
+        username: String?,
+        totalPrice: Double,
+        orderDate: String
     ) {
         val request = hashMapOf(
             "country" to country,
             "hotelAddress" to hotelAddress,
             "travelDates" to travelDates,
             "username" to username,
+            "totalPrice" to totalPrice,
+            "orderDate" to orderDate,
             "supplies" to supplyRequests.map { supply ->
                 mapOf(
                     "name" to supply.name,
-                    "quantity" to supply.quantity
+                    "quantity" to supply.quantity,
+                    "price" to supply.price
                 )
             }
         )
@@ -67,18 +74,53 @@ class TravelRepository @Inject constructor() {
             .await()
     }
 
-
-    suspend fun getSupplies(): List<String> {
+    suspend fun getSupplies(): List<SupplyRequest> {
         return try {
             val snapshot = db.collection("supplies")
                 .get()
                 .await()
 
             snapshot.documents.mapNotNull { document ->
-                document.getString("name")
+                SupplyRequest(
+                    name = document.getString("name") ?: "",
+                    price = document.getDouble("price") ?: 0.0
+                )
             }
         } catch (e: Exception) {
+            Log.e("TravelRepository", "Error fetching supplies", e)
             emptyList()
         }
     }
+
+    suspend fun getPastRequests(): List<PastRequest> {
+        return try {
+            val snapshot = db.collection("TravelRequestForm")
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { document ->
+                val supplyRequests = (document.get("supplies") as List<Map<String, Any>>).map {
+                    SupplyRequest(
+                        name = it["name"] as String,
+                        quantity = (it["quantity"] as Long).toInt(),
+                        price = (it["price"] as? Double) ?: 0.0 // Default to 0.0 if price is null
+                    )
+                }
+
+                PastRequest(
+                    id = document.id,
+                    orderDate = document.getString("orderDate") ?: "",
+                    country = document.getString("country") ?: "",
+                    hotelAddress = document.getString("hotelAddress") ?: "",
+                    travelDates = document.getString("travelDates") ?: "",
+                    totalPrice = document.getDouble("totalPrice") ?: 0.0, // Default to 0.0 if totalPrice is null
+                    supplyRequests = supplyRequests
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("TravelRepository", "Error fetching past requests", e)
+            emptyList()
+        }
+    }
+
 }
