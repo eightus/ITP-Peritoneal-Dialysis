@@ -35,10 +35,14 @@ import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TrainingScreen
 import com.itp.pdbuddy.ui.screen.NewNotificationScreen
 import com.itp.pdbuddy.ui.screen.NotificationScreen
+import com.itp.pdbuddy.ui.screen.PastRequestScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionHistoryScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionManagementScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionManualScreen
+import com.itp.pdbuddy.ui.screen.SuccessPaymentTravelScreen
+import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TravelDetailsScreen
+import com.itp.pdbuddy.ui.screen.TravelMainScreen
 import com.itp.pdbuddy.ui.screen.TravelRequestScreen
 import com.itp.pdbuddy.ui.screen.TravelScreen
 
@@ -186,6 +190,24 @@ object NavigationConfig {
             route = "travelRequest",
             title = "Travel Request",
             screen = { navController -> TravelRequestScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "travelMain",
+            title = "Travel Main",
+            screen = { navController -> TravelMainScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "successPaymentTravelScreen",
+            title = "Success Payment Travel Screen",
+            screen = { navController -> SuccessPaymentTravelScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "pastRequestScreen",
+            title = "Past Request Screen",
+            screen = { navController -> PastRequestScreen(navController = navController) }
 
         ),
         NavItem(

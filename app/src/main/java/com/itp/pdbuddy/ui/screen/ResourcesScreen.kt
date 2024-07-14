@@ -67,7 +67,7 @@ fun ResourcesScreen(navController: NavHostController) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             ResourceButton(
-                text = "Additional Material",
+                text = "PD Essential Guides",
                 icon = Icons.TwoTone.Description,
                 onClick = { navController.navigate("additionalmaterial") }
             )
