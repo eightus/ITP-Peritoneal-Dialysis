@@ -2,11 +2,8 @@ package com.itp.pdbuddy.navigation
 
 import PastSuppliesScreen
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SmartScreen
 import androidx.compose.material.icons.twotone.Inventory2
@@ -19,7 +16,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.itp.pdbuddy.data.repository.Resource
+import com.itp.pdbuddy.ui.screen.HistoryScreen
 import com.itp.pdbuddy.ui.screen.AdditionalMaterialScreen
 import com.itp.pdbuddy.ui.screen.CartSuppliesScreen
 import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
@@ -36,9 +33,7 @@ import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.ResourcesScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TrainingScreen
-import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 import com.itp.pdbuddy.ui.screen.NewNotificationScreen
-import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.NotificationScreen
 import com.itp.pdbuddy.ui.screen.PastRequestScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionHistoryScreen
@@ -93,6 +88,12 @@ object NavigationConfig {
             title = "record",
             icon = Icons.Default.Person,
             screen = { navController -> RecordScreen(navController = navController) }
+        ),
+        NavItem(
+          route = "history",
+            title = "History",
+            icon = Icons.Default.History,
+            screen = { navController -> HistoryScreen(navController = navController) }
         ),
         NavItem(
             route = "manualrecord",
@@ -263,7 +264,7 @@ fun NavGraphBuilder.addNavItems(navController: NavHostController, navItems: List
 @Composable
 fun AppNavigation(navController: NavHostController, modifier: Modifier) {
 
-    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "home", modifier = modifier) {
         addNavItems(navController, NavigationConfig.navItems)
     }
 //    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {

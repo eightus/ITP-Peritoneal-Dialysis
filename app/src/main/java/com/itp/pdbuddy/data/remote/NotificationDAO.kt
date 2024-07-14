@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.itp.pdbuddy.data.remote.table.Notification
+import com.itp.pdbuddy.data.model.Notification
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -13,8 +13,8 @@ interface NotificationDAO {
     @Query("SELECT * FROM notification_table")
     fun getItems(): Flow<List<Notification>>
 
-    @Query("SELECT id FROM notification_table WHERE time = :time AND date = :date AND type = :type")
-    fun getId(time: String, date: String, type: String): List<Int>
+    @Query("SELECT id FROM notification_table WHERE time = :time AND date = :date AND type = :type AND medication = :medication")
+    fun getId(time: String, date: String, type: String, medication: String): List<Int>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(notification: Notification)
