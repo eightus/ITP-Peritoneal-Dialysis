@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import com.itp.pdbuddy.data.remote.AuthDataSource
 import com.itp.pdbuddy.utils.Result
 import kotlinx.coroutines.tasks.await
@@ -11,7 +12,7 @@ import javax.inject.Inject
 
 class FirebaseAuthDataSource @Inject constructor() : AuthDataSource {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override suspend fun login(email: String, password: String): Result<Boolean> {
         return try {
@@ -48,8 +49,21 @@ class FirebaseAuthDataSource @Inject constructor() : AuthDataSource {
             val displayName = user?.displayName
             if (displayName != null) {
                 Log.d("getUsername", displayName)
+                Result.Success(displayName)
+            } else {
+                user?.uid?.let { uid ->
+                    val documentSnapshot = firestore.collection("users").document(uid).get().await()
+                    val username = documentSnapshot.getString("username")
+                    if (username != null) {
+                        Log.d("getUsername", username)
+                        updateDisplayName(username)
+                        Result.Success(username)
+                    } else {
+                        Result.Failure(Exception("Username not found"))
+                    }
+                } ?: Result.Failure(Exception("User not logged in"))
             }
-            Result.Success(displayName)
+
         } catch (e: Exception) {
             Result.Failure(e)
         }
