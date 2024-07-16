@@ -1,6 +1,7 @@
 package com.itp.pdbuddy.navigation
 
 import PastSuppliesScreen
+import ProfileScreen
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Calculate
@@ -26,7 +27,6 @@ import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
 import com.itp.pdbuddy.ui.screen.HomeScreen
 import com.itp.pdbuddy.ui.screen.OrderDetailsScreen
 import com.itp.pdbuddy.ui.screen.PaymentScreen
-import com.itp.pdbuddy.ui.screen.ProfileScreen
 import com.itp.pdbuddy.ui.screen.SplashScreen
 import com.itp.pdbuddy.ui.screen.RecordScreen
 import com.itp.pdbuddy.ui.screen.ManualRecordScreen
