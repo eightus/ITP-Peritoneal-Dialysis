@@ -35,20 +35,6 @@ fun ProfileScreen(navController: NavHostController) {
     val networkViewModel: NetworkViewModel = hiltViewModel()
     var base64Image by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
-        networkViewModel.fetchGraph { result ->
-            when (result) {
-                is Result.Success -> {
-                    Log.d("MainActivity", "Success: ${result.data.values}")
-                    base64Image = result.data["image"] as? String
-                }
-
-                is Result.Failure -> Log.d("MainActivity", "Failure: ${result.exception}")
-                is Result.Loading -> Log.d("MainActivity", "Loading")
-                is Result.Idle -> Log.d("MainActivity", "Idle")
-            }
-        }
-    }
 
     Column {
 
@@ -58,20 +44,6 @@ fun ProfileScreen(navController: NavHostController) {
 
         Button(onClick = { authViewModel.updateDisplayName("UserTest") }) {
             Text("Set Username to UserTest")
-        }
-
-        base64Image?.let { base64Str ->
-            val imageBytes = Base64.decode(base64Str, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Test Image",
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
-            )
         }
 
     }

@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.itp.pdbuddy.data.model.Prescription
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
 import com.itp.pdbuddy.ui.viewmodel.PrescriptionViewModel
+import com.itp.pdbuddy.utils.navigate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -160,6 +161,7 @@ fun PrescriptionManualScreen(navController: NavController) {
                     username = "" // This will be populated in the ViewModel
                 )
                 prescriptionViewModel.addPrescription(prescription)
+                navigate(navController, "prescription", false)
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)

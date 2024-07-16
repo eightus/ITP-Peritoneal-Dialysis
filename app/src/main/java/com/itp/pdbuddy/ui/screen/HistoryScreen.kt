@@ -3,9 +3,13 @@ package com.itp.pdbuddy.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,11 +32,13 @@ fun HistoryScreen(navController: NavHostController, viewModel: HistoryViewModel 
     LaunchedEffect(Unit) {
         viewModel.getRecords()
     }
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .verticalScroll(scrollState)
     ) {
         Text(
             text = "History",
@@ -73,14 +79,18 @@ fun HistoryItem(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Card(
-        shape = RoundedCornerShape(8.dp),
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { showDialog = true }
+            .padding(vertical = 5.dp)
+            .clickable { showDialog = true },
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .background(Color.White)
                 .padding(16.dp)
         ) {
