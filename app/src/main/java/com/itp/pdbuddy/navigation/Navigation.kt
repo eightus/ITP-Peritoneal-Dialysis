@@ -3,11 +3,8 @@ package com.itp.pdbuddy.navigation
 import PastSuppliesScreen
 import ProfileScreen
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SmartScreen
 import androidx.compose.material.icons.twotone.Inventory2
@@ -20,7 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.itp.pdbuddy.data.repository.Resource
+import com.itp.pdbuddy.ui.screen.HistoryScreen
 import com.itp.pdbuddy.ui.screen.AdditionalMaterialScreen
 import com.itp.pdbuddy.ui.screen.CartSuppliesScreen
 import com.itp.pdbuddy.ui.screen.CurrentSuppliesScreen
@@ -36,15 +33,16 @@ import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.ResourcesScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TrainingScreen
-import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 import com.itp.pdbuddy.ui.screen.NewNotificationScreen
-import com.itp.pdbuddy.ui.screen.RecordSuccessScreen
 import com.itp.pdbuddy.ui.screen.NotificationScreen
+import com.itp.pdbuddy.ui.screen.PastRequestScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionHistoryScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionManagementScreen
 import com.itp.pdbuddy.ui.screen.PrescriptionManualScreen
+import com.itp.pdbuddy.ui.screen.SuccessPaymentTravelScreen
 import com.itp.pdbuddy.ui.screen.SuppliesScreen
 import com.itp.pdbuddy.ui.screen.TravelDetailsScreen
+import com.itp.pdbuddy.ui.screen.TravelMainScreen
 import com.itp.pdbuddy.ui.screen.TravelRequestScreen
 import com.itp.pdbuddy.ui.screen.TravelScreen
 
@@ -90,6 +88,12 @@ object NavigationConfig {
             title = "record",
             icon = Icons.Default.Person,
             screen = { navController -> RecordScreen(navController = navController) }
+        ),
+        NavItem(
+          route = "history",
+            title = "History",
+            icon = Icons.Default.History,
+            screen = { navController -> HistoryScreen(navController = navController) }
         ),
         NavItem(
             route = "manualrecord",
@@ -186,6 +190,24 @@ object NavigationConfig {
             route = "travelRequest",
             title = "Travel Request",
             screen = { navController -> TravelRequestScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "travelMain",
+            title = "Travel Main",
+            screen = { navController -> TravelMainScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "successPaymentTravelScreen",
+            title = "Success Payment Travel Screen",
+            screen = { navController -> SuccessPaymentTravelScreen(navController = navController) }
+
+        ),
+        NavItem(
+            route = "pastRequestScreen",
+            title = "Past Request Screen",
+            screen = { navController -> PastRequestScreen(navController = navController) }
 
         ),
         NavItem(

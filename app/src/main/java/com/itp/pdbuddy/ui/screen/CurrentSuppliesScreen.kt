@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -13,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -119,7 +122,8 @@ val supplyImageMap = mapOf(
     "syringes" to R.drawable.syringes,
     "tapeanddressings" to R.drawable.tapeanddressings,
     "transfersets" to R.drawable.transfersets,
-    "wastedisposalbags" to R.drawable.wastedisposalbags
+    "wastedisposalbags" to R.drawable.wastedisposalbags,
+    "apdmachine" to R.drawable.apdmachine
 )
 
 @Composable
@@ -229,7 +233,11 @@ fun UpdateQuantityDialog(
                     value = quantity,
                     onValueChange = { quantity = it },
                     label = { Text("Quantity") },
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    )
                 )
             }
         },

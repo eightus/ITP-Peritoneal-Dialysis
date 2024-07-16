@@ -19,10 +19,10 @@ class ExternalAPIDataSource @Inject constructor(): APIDataSource {
     }
 
     override suspend fun getTimeOn(): String{
-        return "22/06/2024 3:0"
+        return "22/06/2024 07:00 PM"
     }
 
     override suspend fun getTimeOff(): String{
-        return "22/06/2024 10:0"
+        return "23/06/2024 05:00 AM"
     }
 }

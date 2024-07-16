@@ -1,8 +1,7 @@
 package com.itp.pdbuddy.data.repository
 
 import com.itp.pdbuddy.data.remote.NotificationDAO
-import com.itp.pdbuddy.data.remote.table.Notification
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.itp.pdbuddy.data.model.Notification
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -25,8 +24,8 @@ class NotificationRepository @Inject constructor(
         dao.deleteAll()
     }
 
-    suspend fun getId(time: String, date: String, type: String): List<Int> {
-        return dao.getId(time, date, type)
+    suspend fun getId(time: String, date: String, type: String, medication: String): List<Int> {
+        return dao.getId(time, date, type, medication)
     }
 
 

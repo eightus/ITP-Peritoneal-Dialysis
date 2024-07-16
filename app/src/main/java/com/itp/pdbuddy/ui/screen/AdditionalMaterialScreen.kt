@@ -46,12 +46,12 @@ fun AdditionalMaterialScreen(navController: NavHostController, resourcesViewMode
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Training Resources",
+                text = "PD Essential Guides",
                 style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text (
-                text = "Additional materials covering various topics such as how to shower while on peritoneal " +
+                text = "PD Essential Guides covering various topics such as how to shower while on peritoneal " +
                         "dialysis, choosing the right bag to use, and an education video to learn more.",
                 fontSize = 20.sp,
                 color = PDBuddyTheme.customColors.strongTextColor
