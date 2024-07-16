@@ -1,5 +1,4 @@
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,7 +24,9 @@ import com.itp.pdbuddy.utils.Result
 @SuppressLint("RememberReturnType")
 fun ProfileScreen(navController: NavHostController) {
     val profileViewModel: ProfileViewModel = hiltViewModel()
-    val userdata by profileViewModel.userData.collectAsState()
+    val userData by profileViewModel.userData.collectAsState()
+
+    // MutableState variables to hold editable data
     var name by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -33,74 +34,64 @@ fun ProfileScreen(navController: NavHostController) {
     var birthdate by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        profileViewModel.doTest("UserTest")
-    }
+    // State to manage edit mode
+    var isEditing by remember { mutableStateOf(false) }
 
-    when (userdata) {
-        is Result.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+    LaunchedEffect(userData) {
+        when (userData) {
+            is Result.Success -> {
+                val user = (userData as Result.Success<List<Map<String, Any>>>).data.firstOrNull()
+                user?.let {
+                    name = it["username"] as? String ?: ""
+                    address = it["address"] as? String ?: ""
+                    phone = it["phone"] as? String ?: ""
+                    email = it["email"] as? String ?: ""
+                    birthdate = it["birthdate"] as? String ?: ""
+                    gender = it["gender"] as? String ?: ""
+                }
             }
-        }
-        is Result.Success -> {
-            val user = (userdata as Result.Success<List<Map<String, Any>>>).data.firstOrNull()
-            user?.let {
-                name = it["username"] as? String ?: ""
-                address = it["address"] as? String ?: ""
-                phone = it["phone"] as? String ?: ""
-                email = it["email"] as? String ?: ""
-                birthdate = it["birthdate"] as? String ?: ""
-                gender = it["gender"] as? String ?: ""
-            }
-        }
-        is Result.Failure -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Failed to load user data")
-            }
-        }
-        Result.Idle -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Idle state")
+            else -> {
+                // Handle loading, error, or idle states if needed
+                // For simplicity, nothing is rendered here for other states
             }
         }
     }
 
-    val userProfile = UserProfile(
+    ProfileContent(
         name = name,
-        bio = "Android Developer. Tech Enthusiast. Coffee Lover.",
-        profileImage = R.drawable.login_image
+        address = address,
+        phone = phone,
+        email = email,
+        birthdate = birthdate,
+        gender = gender,
+        isEditing = isEditing,
+        onEditButtonClick = { isEditing = !isEditing },
+        onSaveButtonClick = {
+            profileViewModel.updateUserInfo(name, address, phone, email, birthdate, gender)
+            isEditing = false
+        },
+        onNameChange = { name = it },
+        onAddressChange = { address = it },
+        onPhoneChange = { phone = it },
+        onEmailChange = { email = it },
+        onBirthdateChange = { birthdate = it },
+        onGenderChange = { gender = it }
     )
+}
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Profile") }
-            )
-        }
-    ) { paddingValues ->
-        ProfileContent(
-            name = userProfile.name,
-            address = address,
-            phone = phone,
-            email = email,
-            birthdate = birthdate,
-            gender = gender,
-            paddingValues = paddingValues
-        )
-    }
+@Composable
+fun EditableTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: @Composable () -> Unit,
+    readOnly: Boolean
+) {
+    TextField(
+        value = value,
+        onValueChange = { newValue -> onValueChange(newValue) },
+        label = label,
+        readOnly = readOnly
+    )
 }
 
 @Composable
@@ -111,60 +102,82 @@ fun ProfileContent(
     email: String,
     birthdate: String,
     gender: String,
-    paddingValues: PaddingValues
+    isEditing: Boolean,
+    onEditButtonClick: () -> Unit,
+    onSaveButtonClick: () -> Unit,
+    onNameChange: (String) -> Unit,
+    onAddressChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onBirthdateChange: (String) -> Unit,
+    onGenderChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         ProfilePicture(imageRes = R.drawable.login_image)
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = name,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+        EditableTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text("Name") },
+            readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        EditableTextField(
             value = address,
-            onValueChange = {},
+            onValueChange = onAddressChange,
             label = { Text("Address") },
-            readOnly = true
+            readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        EditableTextField(
             value = phone,
-            onValueChange = {},
+            onValueChange = onPhoneChange,
             label = { Text("Phone") },
-            readOnly = true
+            readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        EditableTextField(
             value = email,
-            onValueChange = {},
+            onValueChange = onEmailChange,
             label = { Text("Email") },
-            readOnly = true
+            readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        EditableTextField(
             value = birthdate,
-            onValueChange = {},
+            onValueChange = onBirthdateChange,
             label = { Text("Birthdate") },
-            readOnly = true
+            readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        EditableTextField(
             value = gender,
-            onValueChange = {},
+            onValueChange = onGenderChange,
             label = { Text("Gender") },
-            readOnly = true
+            readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { /* Handle message action */ }) {
-            Text(text = "Edit")
+        if (isEditing) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Button(onClick = onSaveButtonClick) {
+                    Text(text = "Save")
+                }
+                Button(onClick = onEditButtonClick) {
+                    Text(text = "Cancel")
+                }
+            }
+        } else {
+            Button(onClick = onEditButtonClick) {
+                Text(text = "Edit")
+            }
         }
     }
 }
@@ -185,9 +198,3 @@ fun ProfilePicture(imageRes: Int) {
         )
     }
 }
-
-data class UserProfile(
-    val name: String,
-    val bio: String,
-    val profileImage: Int
-)
