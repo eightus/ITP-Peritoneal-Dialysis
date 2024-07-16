@@ -88,9 +88,18 @@ fun EditableTextField(
 ) {
     TextField(
         value = value,
+        enabled = !readOnly,
         onValueChange = { newValue -> onValueChange(newValue) },
         label = label,
-        readOnly = readOnly
+        readOnly = readOnly,
+        colors = TextFieldDefaults.colors(
+            disabledContainerColor = if (readOnly) Color.LightGray else MaterialTheme.colorScheme.surface,
+            disabledIndicatorColor = Color.Transparent,
+            disabledLabelColor = Color.Gray
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (readOnly) Color.LightGray else MaterialTheme.colorScheme.surface)
     )
 }
 
@@ -125,7 +134,14 @@ fun ProfileContent(
             value = name,
             onValueChange = onNameChange,
             label = { Text("Name") },
-            readOnly = !isEditing
+            readOnly = true
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        EditableTextField(
+            value = email,
+            onValueChange = onEmailChange,
+            label = { Text("Email") },
+            readOnly = true
         )
         Spacer(modifier = Modifier.height(8.dp))
         EditableTextField(
@@ -139,13 +155,6 @@ fun ProfileContent(
             value = phone,
             onValueChange = onPhoneChange,
             label = { Text("Phone") },
-            readOnly = !isEditing
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        EditableTextField(
-            value = email,
-            onValueChange = onEmailChange,
-            label = { Text("Email") },
             readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
