@@ -211,7 +211,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 }
             }
             item{
-                textNumberBox(title = "Blood Pressure", variable = bp, tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg")
+                textNumberBox(title = "Blood Pressure", variable = bp, tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg", numeric = false)
 
             }
             item{

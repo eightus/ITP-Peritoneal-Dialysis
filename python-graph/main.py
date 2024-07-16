@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 
-from schema import TokenRequest
+from schema import TokenRequest, Record
 
 from pathlib import Path
 import firebase_admin
@@ -46,12 +46,53 @@ async def read_helloworld():
     """
     return {"message": "Hello, World!"}
 
-    
+@app.post("/add_record")
+async def add_record(record: Record):
+    try:
+        record_data = {
+                "Name": "UserTest",
+                "RecordDate": record.RecordDate,
+                "Blood Pressure": record.BloodPressure,
+                "Heart Rate": record.HeartRate,
+                "Weight": record.Weight,
+                "Urine Out": record.UrineOut,
+                "Time On": record.TimeOn,
+                "Time Off": record.TimeOff,
+                "Heater Bag Type": record.HeaterBagType,
+                "Heater Bag Amount": record.HeaterBagAmount,
+                "White Bag Type": record.WhiteBagType,
+                "White Bag Amount": record.WhiteBagAmount,
+                "Blue Bag Type": record.BlueBagType,
+                "Blue Bag Type (Others)": record.BlueBagTypeOthers,
+                "Blue Bag Amount": record.BlueBagAmount,
+                "Type of Therapy": record.TypeOfTherapy,
+                "Total Volume": record.TotalVolume,
+                "Target UF": record.TargetUF,
+                "Therapy Time": record.TherapyTime,
+                "Fill Volume": record.FillVolume,
+                "Last Fill volume": record.LastFillVolume,
+                "Dextrose % Conc.": record.DextroseConc,
+                "No. of Cycles": record.Cycles,
+                "Initial Drain": record.InitialDrain,
+                "Avg Dwell Time": record.AvgDwellTime,
+                "Color of Drainage": record.ColorOfDrainage,
+                "Total UF": record.TotalUF,
+                "Nett UF": record.NettUF,
+                "Remarks": record.Remarks
+            }
+        
+        db.collection('Record').add(record_data)
+        
+        return {"message": "Record added successfully"}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+
 @app.post("/weight_graph")
 async def graph(request: TokenRequest):
     try:
         decoded_token = auth.verify_id_token(request.token, clock_skew_seconds=10)
-        print(decoded_token)
         name = decoded_token['name']
         
         records_ref = db.collection('Record')
@@ -63,10 +104,12 @@ async def graph(request: TokenRequest):
             filtered_data = {
                 "Name": data.get("Name"),
                 "Weight": data.get("Weight"),
-                "Record Date": data.get("Record Date")
+                "RecordDate": data.get("RecordDate")
             }
             records.append(filtered_data)
-        dates = [record["Record Date"] for record in records if record["Weight"]]
+
+        print(records)
+        dates = [record["RecordDate"] for record in records if record["Weight"]]
         weights = [float(record["Weight"]) for record in records if record["Weight"]]
         formatted_dates = [datetime.strptime(date, '%d/%m/%Y').strftime('%d %B') for date in dates]
 
