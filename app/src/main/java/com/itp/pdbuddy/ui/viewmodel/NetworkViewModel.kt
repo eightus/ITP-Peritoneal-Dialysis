@@ -25,14 +25,14 @@ class NetworkViewModel @Inject constructor(
     }
 
 
-    fun fetchGraph(onResult: (Result<Map<String, Any>>) -> Unit) {
+    fun fetchGraph(graphType: String, onResult: (Result<Map<String, Any>>) -> Unit) {
         viewModelScope.launch {
             val tokenResult = authRepository.getIdToken()
             if (tokenResult is Result.Success) {
                 val token = tokenResult.data
                 if (token != null) {
                     val data = DataPayload(token)
-                    val result = networkRepository.fetchGraph(data)
+                    val result = networkRepository.fetchGraph(data, graphType)
                     onResult(result)
                 } else {
                     onResult(Result.Failure(Exception("Token is null")))

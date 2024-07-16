@@ -27,9 +27,15 @@ class NetworkRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchGraph(data: DataPayload): Result<Map<String, Any>> {
+    suspend fun fetchGraph(data: DataPayload, graphType: String): Result<Map<String, Any>> {
         return try {
-            val response = apiService.getGraph(data)
+            val response = when (graphType) {
+                "Weight" -> apiService.getWeightGraph(data)
+                "Heart Rate" -> apiService.getHeartRateGraph(data)
+                "Blood Pressure" -> apiService.getBloodPressureGraph(data)
+                "Trend Analysis" -> apiService.getTrendAnalysisGraph(data)
+                else -> throw IllegalArgumentException("Unknown graph type: $graphType")
+            }
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
