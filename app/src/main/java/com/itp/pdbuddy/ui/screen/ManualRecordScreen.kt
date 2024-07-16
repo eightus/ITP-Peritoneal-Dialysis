@@ -300,7 +300,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
             }
             if (blueBagDext.value == "Others"){
                 item{
-                    textNumberBox(title = "Type (Others)", variable = blueBagType, tooltipMessage = "If Others, state the type")
+                    textNumberBox(title = "Type (Others)", variable = blueBagType, tooltipMessage = "If Others, state the type", numeric = false)
                 }
             }
             item{
@@ -337,7 +337,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 textNumberBox(title = "Dextrose % Conc", variable = dextCon, numeric = false, tooltipMessage = "% concentration od Dextrose used")
             }
             item{
-                textNumberBox(title = "No. of Cycles", variable = cycles)
+                textNumberBox(title = "No. of Cycles", variable = cycles, numeric = false)
             }
             item{
                 textNumberBox(title = "Initial Drain", variable = initDrain, tooltipMessage = "Measured in mL")

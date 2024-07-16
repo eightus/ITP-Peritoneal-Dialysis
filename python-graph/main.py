@@ -88,9 +88,18 @@ async def add_record(record: Record):
         print(e)
         raise HTTPException(status_code=401, detail="Authentication failed")
 
-
+@app.post("/blood_pressure_graph")
+async def blood_pressure_graph(request: TokenRequest):
+    try:
+        decoded_token = auth.verify_id_token(request.token, clock_skew_seconds=10)
+        name = decoded_token['name']
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="Authentication failed")
+    
+        
 @app.post("/weight_graph")
-async def graph(request: TokenRequest):
+async def weight_graph(request: TokenRequest):
     try:
         decoded_token = auth.verify_id_token(request.token, clock_skew_seconds=10)
         name = decoded_token['name']
