@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -77,14 +79,18 @@ fun HistoryItem(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Card(
-        shape = RoundedCornerShape(8.dp),
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { showDialog = true }
+            .padding(vertical = 5.dp)
+            .clickable { showDialog = true },
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .background(Color.White)
                 .padding(16.dp)
         ) {
