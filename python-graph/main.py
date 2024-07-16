@@ -28,7 +28,7 @@ fbapp = firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 app.add_middleware(

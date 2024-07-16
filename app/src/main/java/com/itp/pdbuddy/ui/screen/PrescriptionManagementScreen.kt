@@ -1,5 +1,6 @@
 package com.itp.pdbuddy.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,7 +30,7 @@ fun PrescriptionManagementScreen(navController: NavController) {
     val prescriptionViewModel: PrescriptionViewModel = hiltViewModel()
     val latestPrescriptionState by prescriptionViewModel.latestPrescription.collectAsState()
     val errorMessage by prescriptionViewModel.errorMessage.collectAsState()
-
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         prescriptionViewModel.fetchLatestPrescription()
     }
@@ -68,7 +70,9 @@ fun PrescriptionManagementScreen(navController: NavController) {
             Column {
                 when (latestPrescriptionState) {
                     is Result.Loading -> {
-                        CircularProgressIndicator()
+                        Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
                     }
                     is Result.Success -> {
                         val prescription = (latestPrescriptionState as Result.Success).data
@@ -125,7 +129,9 @@ fun PrescriptionManagementScreen(navController: NavController) {
                 UpdateOptionButton(text = "Manual Update", onClick = { navigate(navController, "prescriptionManual") })
                 Spacer(modifier = Modifier.height(12.dp))
                 UpdateOptionButton(text = "Automatic Update", onClick = {
+
                     prescriptionViewModel.fetchLatestPrescription()
+                    Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
                 })
                 Spacer(modifier = Modifier.height(12.dp))
                 UpdateOptionButton(text = "Prescription History", onClick = { navigate(navController, "prescriptionHistory") })
