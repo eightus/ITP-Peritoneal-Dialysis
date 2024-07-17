@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import com.itp.pdbuddy.R
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
 import android.widget.Toast
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
@@ -63,6 +64,11 @@ fun CurrentSuppliesScreen(
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Text("Add New Supplies")
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Cart",
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -91,7 +97,12 @@ fun CurrentSuppliesScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { navController.navigate("CartSupplies") }) {
-                Text("Cart")
+                Text("Proceed to Cart")
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = "Cart",
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
@@ -150,6 +161,8 @@ fun SupplyCard(
             onConfirm = { newQuantity ->
                 onUpdateQuantity(item.copy(quantity = newQuantity), newQuantity)
                 showEditDialog = false
+                Toast.makeText(context, "Quantity updated!", Toast.LENGTH_SHORT).show()
+
             }
         )
     }
