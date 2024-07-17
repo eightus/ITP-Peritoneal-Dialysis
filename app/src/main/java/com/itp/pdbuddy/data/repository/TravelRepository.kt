@@ -1,6 +1,7 @@
 package com.itp.pdbuddy.data.repository
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.itp.pdbuddy.ui.screen.Clinic
 import com.itp.pdbuddy.ui.screen.SupplyRequest
@@ -47,12 +48,14 @@ class TravelRepository @Inject constructor() {
     suspend fun submitTravelRequest(
         country: String,
         hotelAddress: String,
-        travelDates: String,
+        travelStartDate: String,
+        travelEndDate: String,
         supplyRequests: List<SupplyRequest>,
         username: String?,
         totalPrice: Double,
         orderDate: String
     ) {
+        val travelDates = "$travelStartDate - $travelEndDate"
         val request = hashMapOf(
             "country" to country,
             "hotelAddress" to hotelAddress,
@@ -92,9 +95,10 @@ class TravelRepository @Inject constructor() {
         }
     }
 
-    suspend fun getPastRequests(): List<PastRequest> {
+    suspend fun getPastRequests(username: String): List<PastRequest> {
         return try {
             val snapshot = db.collection("TravelRequestForm")
+                .whereEqualTo("username", username)
                 .get()
                 .await()
 
@@ -120,6 +124,21 @@ class TravelRepository @Inject constructor() {
         } catch (e: Exception) {
             Log.e("TravelRepository", "Error fetching past requests", e)
             emptyList()
+        }
+    }
+
+    suspend fun getCurrentUsername(): String? {
+        val username = FirebaseAuth.getInstance().currentUser?.uid
+        return if (username != null) {
+            try {
+                val documentSnapshot = db.collection("users").document(username).get().await()
+                documentSnapshot.getString("username")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        } else {
+            null
         }
     }
 

@@ -44,36 +44,42 @@ class PastSuppliesViewModel @Inject constructor(private val suppliesRepository: 
 
     private fun fetchOrders() {
         viewModelScope.launch {
-            db.collection("orders")
-                .get()
-                .addOnSuccessListener { result ->
-                    val ordersList = result.map { document ->
-                        val items = document.get("items") as List<Map<String, Any>>
-                        val itemList = items.map {
-                            Item(
-                                name = it["name"] as String,
-                                price = (it["price"] as Double).toDouble(),
-                                quantity = (it["quantity"] as Long).toInt()
+            val username = suppliesRepository.getCurrentUsername()
+            if (username != null) {
+                db.collection("orders")
+                    .whereEqualTo("userId", username)
+                    .get()
+                    .addOnSuccessListener { result ->
+                        val ordersList = result.map { document ->
+                            val items = document.get("items") as List<Map<String, Any>>
+                            val itemList = items.map {
+                                Item(
+                                    name = it["name"] as String,
+                                    price = (it["price"] as Double).toDouble(),
+                                    quantity = (it["quantity"] as Long).toInt()
+                                )
+                            }
+                            val timestamp = document.getLong("timestamp") ?: 0
+                            val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
+                            val formattedTimestamp = sdf.format(Date(timestamp))
+
+                            Order(
+                                orderId = document.id,
+                                timestamp = timestamp,
+                                formattedTimestamp = formattedTimestamp,
+                                totalAmount = document.getLong("totalAmount")?.toInt() ?: 0,
+                                userId = document.getString("userId") ?: "",
+                                items = itemList
                             )
                         }
-                        val timestamp = document.getLong("timestamp") ?: 0
-                        val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
-                        val formattedTimestamp = sdf.format(Date(timestamp))
-
-                        Order(
-                            orderId = document.id,
-                            timestamp = timestamp,
-                            formattedTimestamp = formattedTimestamp, // Set the formatted timestamp
-                            totalAmount = document.getLong("totalAmount")?.toInt() ?: 0,
-                            userId = document.getString("userId") ?: "",
-                            items = itemList
-                        )
+                        _orders.value = ordersList
                     }
-                    _orders.value = ordersList
-                }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                }
+                    .addOnFailureListener { exception ->
+                        // Handle any errors here
+                    }
+            } else {
+                // Handle case where username is null
+            }
         }
     }
 

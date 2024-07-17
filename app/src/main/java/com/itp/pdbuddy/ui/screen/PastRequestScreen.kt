@@ -27,7 +27,7 @@ fun PastRequestScreen(navController: NavHostController, viewModel: TravelRequest
     var selectedRequest by remember { mutableStateOf<PastRequest?>(null) }
 
     LaunchedEffect(key1 = true) {
-        viewModel.fetchPastRequests() // Fetch past requests on initial load
+        viewModel.fetchPastRequests() // Fetch past requests for the logged-in user on initial load
     }
 
     LazyColumn(

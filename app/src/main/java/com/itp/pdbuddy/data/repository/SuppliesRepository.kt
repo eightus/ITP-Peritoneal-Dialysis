@@ -15,7 +15,7 @@ import javax.inject.Inject
 class SuppliesRepository @Inject constructor() {
     private val db = FirebaseFirestore.getInstance()
 
-    private suspend fun getCurrentUsername(): String? {
+    suspend fun getCurrentUsername(): String? {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         return if (userId != null) {
             try {
