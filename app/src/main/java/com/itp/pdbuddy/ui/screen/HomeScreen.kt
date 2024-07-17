@@ -11,19 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -43,13 +31,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -81,7 +64,6 @@ fun HomeScreen(navController: NavController) {
     val username by authViewModel.username.collectAsState()
     LaunchedEffect(Unit) {
         authViewModel.fetchUsername()
-
     }
     HomeScreenContent(navController = navController, username = username)
 }
@@ -280,18 +262,38 @@ fun SectionCard(title: String, content: String, icon: ImageVector) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HealthGraphScreen() {
-    val graphTypes = listOf("Weight", "Heart Rate", "Blood Pressure", "Trend Analysis")
+    val graphTypes = listOf("My Weight", "My Heart Rate", "My Blood Pressure", "Summary")
     val pagerState = rememberPagerState(pageCount = { graphTypes.size })
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-            .padding(4.dp),
-        contentAlignment = Alignment.Center
+            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
             HealthGraph(graphType = graphTypes[page])
+        }
+        DotsIndicator(totalDots = graphTypes.size, selectedIndex = pagerState.currentPage)
+    }
+}
+
+@Composable
+fun DotsIndicator(totalDots: Int, selectedIndex: Int) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        for (i in 0 until totalDots) {
+            val color = if (i == selectedIndex) MaterialTheme.colorScheme.primary else Color.Gray
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .padding(4.dp)
+                    .background(color = color, shape = RoundedCornerShape(50))
+            )
         }
     }
 }
@@ -302,7 +304,7 @@ fun HealthGraph(graphType: String) {
     var base64Image by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var isError by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false)  }
+    var showDialog by remember { mutableStateOf(false) }
     fun fetchGraph() {
         isLoading = true
         isError = false
@@ -338,14 +340,15 @@ fun HealthGraph(graphType: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         when {
             isLoading -> {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp),
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
