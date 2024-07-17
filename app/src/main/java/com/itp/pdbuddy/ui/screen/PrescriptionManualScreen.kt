@@ -2,14 +2,16 @@ package com.itp.pdbuddy.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.itp.pdbuddy.data.model.Prescription
-import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
+import com.itp.pdbuddy.data.model.Solution
 import com.itp.pdbuddy.ui.viewmodel.PrescriptionViewModel
 import com.itp.pdbuddy.utils.navigate
 import java.time.LocalDateTime
@@ -29,15 +31,19 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun PrescriptionManualScreen(navController: NavController) {
-
-    var prescriptionViewModel: PrescriptionViewModel = hiltViewModel()
+    val prescriptionViewModel: PrescriptionViewModel = hiltViewModel()
     val errorMessage by prescriptionViewModel.errorMessage.collectAsState()
-
-
+    val scrollState = rememberScrollState()
     var solutionType by remember { mutableStateOf("1.5% Dextrose") }
-    var amount by remember { mutableStateOf(TextFieldValue("")) }
-    var therapySchedule by remember { mutableStateOf(TextFieldValue("")) }
+    var bagVolume by remember { mutableStateOf(TextFieldValue("")) }
+    var solutions = remember { mutableStateListOf<Solution>() }
+
+    var fillVolume by remember { mutableStateOf(TextFieldValue("")) }
     var numberOfCycles by remember { mutableStateOf(TextFieldValue("")) }
+    var totalCycles by remember { mutableStateOf(TextFieldValue("")) }
+    var totalVolume by remember { mutableStateOf(TextFieldValue("")) }
+    var lastFill by remember { mutableStateOf(TextFieldValue("")) }
+    var capUp by remember { mutableStateOf(false) }
     var additionalInstructions by remember { mutableStateOf(TextFieldValue("")) }
 
     val solutionTypes = listOf(
@@ -50,10 +56,10 @@ fun PrescriptionManualScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         if (errorMessage != null) {
             Text(
                 text = errorMessage!!,
@@ -62,6 +68,7 @@ fun PrescriptionManualScreen(navController: NavController) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
+
         Text(
             text = "Manual Update",
             color = MaterialTheme.colorScheme.primary,
@@ -81,7 +88,7 @@ fun PrescriptionManualScreen(navController: NavController) {
                 label = { Text("Solution Type") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onFocusEvent { expanded = it.isFocused },
+                    .clickable { expanded = true },
                 readOnly = true,
                 singleLine = true
             )
@@ -100,9 +107,9 @@ fun PrescriptionManualScreen(navController: NavController) {
         }
 
         OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
-            label = { Text("Amount (ml)") },
+            value = bagVolume,
+            onValueChange = { bagVolume = it },
+            label = { Text("Bag Volume (L)") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
@@ -110,15 +117,50 @@ fun PrescriptionManualScreen(navController: NavController) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
 
+        Button(
+            onClick = {
+                if (bagVolume.text.isNotEmpty()) {
+                    solutions.add(Solution(type = solutionType, bagVolume = bagVolume.text))
+                    solutionType = "1.5% Dextrose"
+                    bagVolume = TextFieldValue("")
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Add Solution", fontSize = 18.sp)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        solutions.forEachIndexed { index, solution ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("${index + 1}. ${solution.type} - ${solution.bagVolume} L", fontSize = 16.sp)
+                IconButton(onClick = {
+                    solutions.removeAt(index)
+                }) {
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
-            value = therapySchedule,
-            onValueChange = { therapySchedule = it },
-            label = { Text("Therapy Schedule (hrs)") },
+            value = fillVolume,
+            onValueChange = { fillVolume = it },
+            label = { Text("Fill Volume (L)") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
 
         OutlinedTextField(
@@ -131,6 +173,55 @@ fun PrescriptionManualScreen(navController: NavController) {
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
+
+        OutlinedTextField(
+            value = totalCycles,
+            onValueChange = { totalCycles = it },
+            label = { Text("Total Cycles") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        OutlinedTextField(
+            value = totalVolume,
+            onValueChange = { totalVolume = it },
+            label = { Text("Total Volume (L)") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = capUp,
+                onCheckedChange = { capUp = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Cap Up")
+        }
+
+        if (!capUp) {
+            OutlinedTextField(
+                value = lastFill,
+                onValueChange = { lastFill = it },
+                label = { Text("Last Fill (L)") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            )
+        }
 
         OutlinedTextField(
             value = additionalInstructions,
@@ -151,10 +242,13 @@ fun PrescriptionManualScreen(navController: NavController) {
                 val formattedDateTime = currentDateTime.format(formatter)
 
                 val prescription = Prescription(
-                    solutionType = solutionType,
-                    amount = amount.text,
-                    therapySchedule = therapySchedule.text,
+                    solutions = solutions.toList(),
+                    fillVolume = fillVolume.text,
                     numberOfCycles = numberOfCycles.text,
+                    totalCycles = totalCycles.text,
+                    totalVolume = totalVolume.text,
+                    lastFill = lastFill.text,
+                    capUp = capUp,
                     additionalInstructions = additionalInstructions.text,
                     dateTime = formattedDateTime,
                     source = "Manual",
