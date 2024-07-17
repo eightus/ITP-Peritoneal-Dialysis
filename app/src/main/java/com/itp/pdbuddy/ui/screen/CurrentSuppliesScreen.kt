@@ -22,6 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itp.pdbuddy.R
 import com.itp.pdbuddy.ui.viewmodel.CurrentSuppliesViewModel
+import android.widget.Toast
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 
 @Composable
 fun CurrentSuppliesScreen(
@@ -32,6 +36,7 @@ fun CurrentSuppliesScreen(
     val selectedSupplies by csviewModel.selectedSupplies.collectAsState()
     val cartItems by csviewModel.cartItems.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -49,18 +54,15 @@ fun CurrentSuppliesScreen(
                     text = "Current Supplies",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f) // This makes the text take up remaining space
+                    modifier = Modifier.weight(1f)
                 )
-                IconButton(
+                Button(
                     onClick = {
                         showDialog = true
-                        // Handle add button click
-                    }
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
+                    Text("Add New Supplies")
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -78,9 +80,11 @@ fun CurrentSuppliesScreen(
                         },
                         onDeleteSupply = { supplyItem ->
                             csviewModel.deleteSupplyFromFirestore(supplyItem)
+                            Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show()
                         },
                         onRestock = { supplyItem, quantity ->
                             csviewModel.addToCart(supplyItem.copy(quantity = quantity))
+                            Toast.makeText(context, "Item added to cart", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -99,6 +103,7 @@ fun CurrentSuppliesScreen(
             onConfirm = { newSelectedSupplies ->
                 csviewModel.addSuppliesToFirestore(newSelectedSupplies)
                 showDialog = false
+                Toast.makeText(context, "New supplies added", Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -135,6 +140,7 @@ fun SupplyCard(
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showRestockDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     if (showEditDialog) {
         UpdateQuantityDialog(
@@ -154,6 +160,7 @@ fun SupplyCard(
             onConfirm = { quantity ->
                 onRestock(item, quantity)
                 showRestockDialog = false
+                Toast.makeText(context, "Item added to cart", Toast.LENGTH_SHORT).show()
             }
         )
     }
