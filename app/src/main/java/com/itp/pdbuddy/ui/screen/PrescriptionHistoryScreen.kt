@@ -19,10 +19,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.itp.pdbuddy.data.model.Prescription
+import com.itp.pdbuddy.data.model.Solution
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
 import com.itp.pdbuddy.ui.viewmodel.PrescriptionViewModel
 import com.itp.pdbuddy.utils.Result
-
 
 @Composable
 fun PrescriptionHistoryScreen(navController: NavController) {
@@ -92,24 +92,59 @@ fun PrescriptionHistoryItem(prescription: Prescription) {
             .padding(16.dp)
     ) {
         Text("Date & Time: ${prescription.dateTime}", style = MaterialTheme.typography.bodyLarge)
-        Text("Solution Type: ${prescription.solutionType}", style = MaterialTheme.typography.bodyLarge)
-        Text("Amount: ${prescription.amount} ml", style = MaterialTheme.typography.bodyLarge)
-        Text("Therapy Schedule: ${prescription.therapySchedule} hrs", style = MaterialTheme.typography.bodyLarge)
+        prescription.solutions.forEachIndexed { index, solution ->
+            Text("Solution ${index + 1}: ${solution.type} - ${solution.bagVolume} L", style = MaterialTheme.typography.bodyLarge)
+        }
+        Text("Fill Volume: ${prescription.fillVolume} L", style = MaterialTheme.typography.bodyLarge)
         Text("Number of Cycles: ${prescription.numberOfCycles}", style = MaterialTheme.typography.bodyLarge)
+        Text("Total Cycles: ${prescription.totalCycles}", style = MaterialTheme.typography.bodyLarge)
+        Text("Total Volume: ${prescription.totalVolume} L", style = MaterialTheme.typography.bodyLarge)
+        Text("Cap Up: ${if (prescription.capUp) "Yes" else "No"}", style = MaterialTheme.typography.bodyLarge)
+        if (!prescription.capUp) {
+            Text("Last Fill: ${prescription.lastFill} L", style = MaterialTheme.typography.bodyLarge)
+        }
         Text("Additional Instructions: ${prescription.additionalInstructions}", style = MaterialTheme.typography.bodyLarge)
         Text("Source: ${prescription.source}", style = MaterialTheme.typography.bodyLarge)
     }
 }
-
 
 @Composable
 @Preview(showBackground = true)
 fun PrescriptionHistoryScreenPreview() {
     val mockNavController = rememberNavController()
     val mockPrescriptions = listOf(
-        Prescription("1.5% Dextrose", "2000", "10", "4", "Monitor drainage color. Contact healthcare provider if cloudy.", "2023-06-27 14:34", "Manual", "TestUser"),
-        Prescription("2.5% Dextrose", "2500", "8", "3", "Follow diet plan. Measure blood pressure regularly.", "2023-06-26 14:34", "Automated", "TestUser"),
-        Prescription("4.25% Dextrose", "1500", "12", "5", "Ensure proper hygiene. Contact healthcare provider if feeling unwell.", "2023-06-25 14:34", "Manual", "TestUser")
+        Prescription(
+            solutions = listOf(
+                Solution("1.5% Dextrose", "5"),
+                Solution("2.5% Dextrose", "5")
+            ),
+            fillVolume = "1.8",
+            numberOfCycles = "4",
+            totalCycles = "4",
+            totalVolume = "7.2",
+            lastFill = "2.0",
+            capUp = false,
+            additionalInstructions = "Monitor drainage color. Contact healthcare provider if cloudy.",
+            dateTime = "2023-06-27 14:34",
+            source = "Manual",
+            username = "TestUser"
+        ),
+        Prescription(
+            solutions = listOf(
+                Solution("2.5% Dextrose", "5"),
+                Solution("4.25% Dextrose", "5")
+            ),
+            fillVolume = "2.0",
+            numberOfCycles = "5",
+            totalCycles = "5",
+            totalVolume = "9.0",
+            lastFill = "2.5",
+            capUp = false,
+            additionalInstructions = "Ensure proper hygiene. Contact healthcare provider if feeling unwell.",
+            dateTime = "2023-06-26 14:34",
+            source = "Automated",
+            username = "TestUser"
+        )
     )
     PDBuddyTheme {
         PrescriptionHistoryScreen(navController = mockNavController)
