@@ -32,7 +32,6 @@ class TravelRequestViewModel @Inject constructor(
     init {
         fetchSupplies()
         fetchUsername()
-        fetchPastRequests()
     }
 
     private fun fetchSupplies() {
@@ -48,6 +47,16 @@ class TravelRequestViewModel @Inject constructor(
             val result = authRepository.getUsername()
             if (result is Result.Success) {
                 _username.value = result.data
+                fetchPastRequests() // Fetch past requests with the fetched username
+            }
+        }
+    }
+
+    fun fetchPastRequests() {
+        val currentUsername = _username.value
+        currentUsername?.let { username ->
+            viewModelScope.launch {
+                _pastRequests.value = travelRepository.getPastRequests(username)
             }
         }
     }
@@ -55,7 +64,8 @@ class TravelRequestViewModel @Inject constructor(
     suspend fun submitTravelRequest(
         country: String,
         hotelAddress: String,
-        travelDates: String,
+        travelStartDate: String,
+        travelEndDate: String,
         supplyRequests: List<SupplyRequest>,
         totalPrice: Double,
         orderDate: String
@@ -65,18 +75,13 @@ class TravelRequestViewModel @Inject constructor(
             travelRepository.submitTravelRequest(
                 country = country,
                 hotelAddress = hotelAddress,
-                travelDates = travelDates,
+                travelStartDate = travelStartDate,
+                travelEndDate = travelEndDate,
                 supplyRequests = supplyRequests,
                 username = username,
                 totalPrice = totalPrice,
                 orderDate = orderDate
             )
-        }
-    }
-
-    fun fetchPastRequests() {
-        viewModelScope.launch {
-            _pastRequests.value = travelRepository.getPastRequests()
         }
     }
 

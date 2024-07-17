@@ -3,6 +3,7 @@ package com.itp.pdbuddy.ui.screen
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,12 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.itp.pdbuddy.R
 import com.itp.pdbuddy.ui.viewmodel.TravelRequestViewModel
 import kotlinx.coroutines.launch
 import java.util.*
@@ -29,7 +32,8 @@ import java.util.*
 fun TravelRequestScreen(navController: NavHostController, viewModel: TravelRequestViewModel = hiltViewModel()) {
     var country by remember { mutableStateOf("") }
     var hotelAddress by remember { mutableStateOf("") }
-    var travelDates by remember { mutableStateOf("") }
+    var travelStartDate by remember { mutableStateOf("") }
+    var travelEndDate by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val orderDate = remember {
         "${Calendar.getInstance().get(Calendar.DAY_OF_MONTH)}/${Calendar.getInstance().get(Calendar.MONTH) + 1}/${Calendar.getInstance().get(Calendar.YEAR)}"
@@ -43,13 +47,27 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    val datePickerDialog = remember {
+    val datePickerDialogStart = remember {
         DatePickerDialog(
             context,
             { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
                 val formattedMonth = if (month + 1 < 10) "0${month + 1}" else "${month + 1}"
                 val formattedDayOfMonth = if (dayOfMonth < 10) "0$dayOfMonth" else "$dayOfMonth"
-                travelDates = "$formattedDayOfMonth/${formattedMonth}/${year}"
+                travelStartDate = "$formattedDayOfMonth/${formattedMonth}/${year}"
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    val datePickerDialogEnd = remember {
+        DatePickerDialog(
+            context,
+            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+                val formattedMonth = if (month + 1 < 10) "0${month + 1}" else "${month + 1}"
+                val formattedDayOfMonth = if (dayOfMonth < 10) "0$dayOfMonth" else "$dayOfMonth"
+                travelEndDate = "$formattedDayOfMonth/${formattedMonth}/${year}"
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -64,6 +82,26 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
                 quantity * supply.price
             }
         }
+    }
+
+    val supplyImageMap = remember {
+        mapOf(
+            "antibacterialsolutions" to R.drawable.antibacterialsolutions,
+            "catheterdressingkits" to R.drawable.catheterdressingkits,
+            "catheters" to R.drawable.catheters,
+            "clamps" to R.drawable.clamps,
+            "dialysissolutionbags" to R.drawable.dialysissolutionbags,
+            "emergencykit" to R.drawable.emergencykit,
+            "facemasks" to R.drawable.facemasks,
+            "measuringcontainers" to R.drawable.measuringcontainers,
+            "peritonealdialysisdrainagebags" to R.drawable.peritonealdialysisdrainagebags,
+            "sterilegloves" to R.drawable.sterilegloves,
+            "syringes" to R.drawable.syringes,
+            "tapeanddressings" to R.drawable.tapeanddressings,
+            "transfersets" to R.drawable.transfersets,
+            "wastedisposalbags" to R.drawable.wastedisposalbags,
+            "apdmachine" to R.drawable.apdmachine
+        )
     }
 
     LazyColumn(
@@ -103,19 +141,42 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
-                    .clickable { datePickerDialog.show() }
+                    .clickable { datePickerDialogStart.show() }
             ) {
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
-                    contentDescription = "Select Travel Dates",
+                    contentDescription = "Select Travel Start Date",
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Text("Travel Date", fontSize = 16.sp)
+                Text("Start Date", fontSize = 16.sp)
             }
 
-            if (travelDates.isNotEmpty()) {
+            if (travelStartDate.isNotEmpty()) {
                 Text(
-                    text = "Selected Travel Dates: $travelDates",
+                    text = "Selected Start Date: $travelStartDate",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .clickable { datePickerDialogEnd.show() }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = "Select Travel End Date",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text("End Date", fontSize = 16.sp)
+            }
+
+            if (travelEndDate.isNotEmpty()) {
+                Text(
+                    text = "Selected End Date: $travelEndDate",
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -130,15 +191,26 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
 
         items(supplies.size) { index ->
             val supply = supplies[index]
+            val imageResource = supplyImageMap[supply.name.replace(" ", "").lowercase()] ?: R.drawable.splash_heart // Use placeholder if image is not found
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
             ) {
-                Text(text = supply.name, fontSize = 16.sp)
+                Image(
+                    painter = painterResource(id = imageResource),
+                    contentDescription = supply.name,
+                    modifier = Modifier.size(40.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "$${supply.price}", fontSize = 16.sp)
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = supply.name, fontSize = 16.sp)
+                    Text(text = "$${supply.price}", fontSize = 16.sp)
+                }
                 Spacer(modifier = Modifier.width(8.dp))
 
                 OutlinedTextField(
@@ -169,7 +241,6 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
             if (errorMessage.isNotEmpty()) {
                 Text(
                     text = errorMessage,
-                    color = androidx.compose.ui.graphics.Color.Red,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -184,33 +255,30 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
 
             Button(
                 onClick = {
-                    if (country.isBlank() || hotelAddress.isBlank() || travelDates.isBlank()) {
-                        errorMessage = "Please fill in all fields (Country, Hotel Address, Travel Date)."
-                    } else if (quantityMap.values.any { it <= 0 }) {
-                        errorMessage = "All quantities must be greater than zero."
-                    } else {
-                        val totalPrice = supplies.sumOf { supply ->
-                            val quantity = quantityMap[supply.name] ?: 0
-                            quantity * supply.price
-                        }
-
-                        val supplyRequests = quantityMap.map { (name, quantity) ->
-                            val price = supplies.find { it.name == name }?.price ?: 0.0
-                            SupplyRequest(name = name, quantity = quantity, price = price)
-                        }
-
+                    if (country.isNotEmpty() && hotelAddress.isNotEmpty() && travelStartDate.isNotEmpty() && travelEndDate.isNotEmpty()) {
                         coroutineScope.launch {
-                            viewModel.submitTravelRequest(country, hotelAddress, travelDates, supplyRequests, totalPrice, orderDate)
-                            navController.navigate("successPaymentTravelScreen")
+                            viewModel.submitTravelRequest(
+                                country = country,
+                                hotelAddress = hotelAddress,
+                                travelStartDate = travelStartDate,
+                                travelEndDate = travelEndDate,
+                                supplyRequests = supplies.map { supply ->
+                                    supply.copy(quantity = quantityMap[supply.name] ?: 0)
+                                },
+                                totalPrice = totalPrice,
+                                orderDate = orderDate
+                            )
+                            navController.navigate("SuccessPaymentTravelScreen")
                         }
+                    } else {
+                        errorMessage = "Please fill in all fields."
                     }
                 },
-                shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(bottom = 16.dp)
             ) {
-                Text(text = "Pay", fontSize = 18.sp)
+                Text("Pay")
             }
         }
     }

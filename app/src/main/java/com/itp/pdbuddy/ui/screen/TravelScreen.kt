@@ -58,22 +58,22 @@ fun TravelScreen(navController: NavHostController, viewModel: TravelViewModel = 
                 .padding(horizontal = 32.dp)
         )
 
-        // Display filtered countries
-        if (searchText.isNotEmpty()) {
-            countries.filter {
-                it.contains(searchText, ignoreCase = true)
-            }.forEach { country ->
-                Button(
-                    onClick = { navController.navigate("travelDetails/$country") },
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                        .padding(bottom = 8.dp)
-                ) {
-                    Text(text = country, fontSize = 18.sp)
+        // Search Button
+        Button(
+            onClick = {
+                val countryToSearch = searchText.trim()
+                val matchingCountry = countries.find { it.equals(countryToSearch, ignoreCase = true) }
+                if (matchingCountry != null) {
+                    navController.navigate("travelDetails/$matchingCountry")
                 }
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .padding(top = 8.dp)
+        ) {
+            Text(text = "Search")
         }
     }
 }
+
