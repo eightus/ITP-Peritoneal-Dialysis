@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -44,29 +45,32 @@ fun TrainingScreen(navController: NavHostController, resourcesViewModel: Resourc
         ) {
             Text(
                 text = "Training Resources",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text (
-                text = "This training resource provides clear guidance on peritoneal dialysis (PD), " +
-                        "explaining its procedure" + " for patients. It aims to improve understanding through simple explanations and visuals," +
-                        " supporting better patient outcomes and quality of life.",
-                fontSize = 20.sp,
+                text = "Training resource provides clear guidance on peritoneal dialysis (PD), " +
+                        "explaining the procedure for patients with simple explanations and visuals, " +
+                        "aiming to improve patient outcomes and quality of life",
+                fontSize = 18.sp,
                 color = PDBuddyTheme.customColors.strongTextColor
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             resources.filter { it.type == "training" }.forEach { resource ->
                 Button(
                     onClick = { selectedResource = resource },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.fillMaxWidth()
+                        .height(85.dp)
                 ) {
                     Text(
                         text = resource.title,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 21.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
             if (selectedResource != null) {

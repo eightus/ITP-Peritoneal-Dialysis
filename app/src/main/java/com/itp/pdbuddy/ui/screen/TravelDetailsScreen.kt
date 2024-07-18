@@ -36,7 +36,7 @@ fun TravelDetailsScreen(navController: NavHostController, country: String) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Clinics in $country",
+                text = "PD Vendors in $country",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp
             )
