@@ -45,32 +45,35 @@ fun DietScreen(
         ) {
             Text(
                 text = "Diet Resources",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text (
                 text = "For individuals undergoing peritoneal dialysis, " +
                         "it's crucial to maintain a balanced diet to manage electrolyte levels and " +
                         "minimize waste buildup. Here are some dietary recommendations",
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 color = PDBuddyTheme.customColors.strongTextColor
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             resources.filter { it.type == "diet" }.forEach { resource ->
                 //val imageRes2 = resourcesImageMap[normalizeTitle(resource.title)] ?: R.drawable.splash_heart
                 Button(
                     onClick = { selectedResource = resource },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.fillMaxWidth()
+                        .height(65.dp)
                 ) {
 
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = resource.title,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 21.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(15.dp))
             }
 
             if (selectedResource != null) {

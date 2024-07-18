@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -47,28 +48,31 @@ fun AdditionalMaterialScreen(navController: NavHostController, resourcesViewMode
         ) {
             Text(
                 text = "PD Essential Guides",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text (
-                text = "PD Essential Guides covering various topics such as how to shower while on peritoneal " +
+                text = "PD Essential Guides covers various topics such as how to shower while on peritoneal " +
                         "dialysis, choosing the right bag to use, and an education video to learn more.",
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 color = PDBuddyTheme.customColors.strongTextColor
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(25.dp))
             resources.filter { it.type == "additionalmaterial" }.forEach { resource ->
                 Button(
                     onClick = { selectedResource = resource },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.fillMaxWidth()
+                        .height(80.dp)
                 ) {
                     Text(
                         text = resource.title,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 21.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             if (selectedResource != null) {
