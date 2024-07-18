@@ -39,6 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -111,8 +112,8 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
         "Clear Yellow", "Cloudy Yellow", "Red", "Orange", "Rust", "Bright Yellow",
         "Yellow Green", "Green", "Green with Particles", "Brown Green", "Blue/Purple",
         "Clear Brown", "Brown Black", "Milk White", "Peach/Pink")
-    val bagDext = listOf("1.5% Dext", "2.5% Dext", "4.25% Dext")
-    val blueDext = listOf("1.5% Dext", "2.5% Dext", "4.25% Dext", "Others")
+    val bagDext = listOf("1.5% Dextrose", "2.5% Dextrose", "4.25% Dextrose")
+    val blueDext = listOf("1.5% Dextrose", "2.5% Dextrose", "4.25% Dextrose", "Others")
 
     // Formatters
     var dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -198,30 +199,57 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
             }
             item{
                 datePicker(showRecordingDatePicker, recordingDateState)
-                Text(text = "Recording Date", fontSize = 25.sp)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Text(text = dateFormat.format(recordingDateState.value.time), fontSize = 25.sp)
-                    IconButton(
-                        onClick = { showRecordingDatePicker.value = true }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                Text(text = "Recording Date", fontSize = 25.sp)
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(text = dateFormat.format(recordingDateState.value.time), fontSize = 25.sp)
+//                    IconButton(
+//                        onClick = { showRecordingDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = dateFormat.format(recordingDateState.value.time),
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Recording Date")
+                    } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showRecordingDatePicker.value = !showRecordingDatePicker.value
+                        },
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                }
+                )
             }
             item{
-                textNumberBox(title = "Blood Pressure", variable = bp, tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg", numeric = false)
+                textNumberBox(title = "Blood Pressure (mm/Hg)", variable = bp, tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg", numeric = false)
 
             }
             item{
-                textNumberBox(title = "Heart Rate", variable = hr, tooltipMessage = "Heart Rate, measured in BPM")
+                textNumberBox(title = "Heart Rate (bpm)", variable = hr, tooltipMessage = "Heart Rate, measured in BPM")
             }
             item{
-                textNumberBox(title = "Weight", variable = weight, tooltipMessage = "Weight, measured in KG")
+                textNumberBox(title = "Weight (Kg)", variable = weight, tooltipMessage = "Weight, measured in KG")
             }
             item{
-                textNumberBox(title = "Urine Output", variable = uo, tooltipMessage = "Urine Output, measured in mL")
+                textNumberBox(title = "Urine Output (mL)", variable = uo, tooltipMessage = "Urine Output, measured in mL")
             }
             item{
                 dateTimePicker(
@@ -229,25 +257,52 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                     cal = timeOnState,
                     onDateSelected = timeOnSelected
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Text(text = "Treatment Start Time", fontSize = 25.sp)
-                    Tooltip(message = "Date and Time treatment starts")
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    if(timeOnSelected.value){
-                        Text(text = timeOn.value, fontSize = 25.sp)
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(text = "Treatment Start Time", fontSize = 25.sp)
+//                    Tooltip(message = "Date and Time treatment starts")
+//                }
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    if(timeOnSelected.value){
+//                        Text(text = timeOn.value, fontSize = 25.sp)
+//                    }
+//                    IconButton(
+//                        onClick = {
+//                            showTimeOnDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = if (timeOnSelected.value) timeOn.value else "",
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Treatment Start Time")
+                    } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showTimeOnDatePicker.value = !showTimeOnDatePicker.value
+                        },
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                    IconButton(
-                        onClick = {
-                            showTimeOnDatePicker.value = true }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
-                    }
-                }
+                )
             }
             item{
                 dateTimePicker(
@@ -255,24 +310,51 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                     cal = timeOffState,
                     onDateSelected = timeOffSelected,
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Text(text = "Treatment End Time", fontSize = 25.sp)
-                    Tooltip(message = "Date and Time treatment ends")
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    if(timeOffSelected.value){
-                        Text(text = timeOff.value, fontSize = 25.sp)
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(text = "Treatment End Time", fontSize = 25.sp)
+//                    Tooltip(message = "Date and Time treatment ends")
+//                }
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    if(timeOffSelected.value){
+//                        Text(text = timeOff.value, fontSize = 25.sp)
+//                    }
+//                    IconButton(
+//                        onClick = { showTimeOffDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = if (timeOffSelected.value) timeOff.value else "",
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Treatment Start Time")
+                    } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showTimeOffDatePicker.value = !showTimeOffDatePicker.value
+                        },
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                    IconButton(
-                        onClick = { showTimeOffDatePicker.value = true }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
-                    }
-                }
+                )
             }
             item{
                 Divider(modifier = Modifier.height(5.dp))
@@ -319,7 +401,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 )
             }
             item{
-                textNumberBox(title = "Total Volume", variable = totalVolume, tooltipMessage = "Volume of <>, measured in mL")
+                textNumberBox(title = "Total Volume (mL)", variable = totalVolume, tooltipMessage = "Volume of <>, measured in mL")
             }
             item{
                 textNumberBox(title = "Target UF for Tidal (If applicable)", variable = targetUF, numeric = false, tooltipMessage = "If not applicable, leave this field empty")
@@ -328,10 +410,10 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 textNumberBox(title = "Therapy Time", variable = therapyTime, tooltipMessage = "Total duration of treatment, measured in Hours")
             }
             item{
-                textNumberBox(title = "Fill Volume", variable = fillVol, tooltipMessage = "Measured in mL")
+                textNumberBox(title = "Fill Volume (mL)", variable = fillVol, tooltipMessage = "Measured in mL")
             }
             item{
-                textNumberBox(title = "Last Fill Volume", variable = lastFillVol, tooltipMessage = "Measured in mL")
+                textNumberBox(title = "Last Fill Volume (mL)", variable = lastFillVol, tooltipMessage = "Measured in mL")
             }
             item{
                 textNumberBox(title = "Dextrose % Conc", variable = dextCon, numeric = false, tooltipMessage = "% concentration od Dextrose used")
@@ -340,10 +422,10 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 textNumberBox(title = "No. of Cycles", variable = cycles, numeric = false)
             }
             item{
-                textNumberBox(title = "Initial Drain", variable = initDrain, tooltipMessage = "Measured in mL")
+                textNumberBox(title = "Initial Drain (mL)", variable = initDrain, tooltipMessage = "Measured in mL")
             }
             item{
-                textNumberBox(title = "Average Dwell Time", variable = avgDwellTime, tooltipMessage = "Measured in Hours")
+                textNumberBox(title = "Average Dwell Time (H)", variable = avgDwellTime, tooltipMessage = "Measured in Hours")
             }
             item{
                 dropdownBox(title = "Colour of Drainage", variable = colorDrain, showDropdown = showColorDropdown, dropdownItems = dischargeColor)
@@ -352,13 +434,13 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 Divider(modifier = Modifier.height(2.dp))
             }
             item{
-                textNumberBox(title = "Total UF", variable = totalUF, tooltipMessage = "Measured in mL")
+                textNumberBox(title = "Total UF (mL)", variable = totalUF, tooltipMessage = "Measured in mL")
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
             }
             item{
-                textNumberBox(title = "Nett UF", variable = nettUF, tooltipMessage = "Measured in mL, calculated using Nett UF = (Initial Drain - Last Fill Volume) + Total UF")
+                textNumberBox(title = "Nett UF (mL)", variable = nettUF, tooltipMessage = "Measured in mL, calculated using Nett UF = (Initial Drain - Last Fill Volume) + Total UF")
             }
             item{
                 Divider(modifier = Modifier.height(2.dp))
@@ -402,43 +484,11 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                         }
                         is Result.Idle -> { Text("") }
                     }
-
                 }
-
             }
-
         }
     }
-
-    // Date Picker
-//    if (showRecordingDatePicker.value) {
-//        DatePickerDialog(
-//            onDismissRequest = { showRecordingDatePicker.value = false },
-//            confirmButton = {
-//                TextButton(
-//                    onClick = {
-//                        val selectedDateMillis = datePickerState.selectedDateMillis
-//                        if (selectedDateMillis != null) {
-//                            recordingDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDateMillis))
-//                        }
-//                        showRecordingDatePicker.value = false
-//                              },
-//                    enabled = datePickerState.selectedDateMillis != null
-//                ) {
-//                    Text(text = "Confirm")
-//                }
-//            },
-//            dismissButton = {
-//                TextButton(onClick = { showRecordingDatePicker.value = false }) {
-//                    Text(text = "Dismiss")
-//                }
-//            }) {
-//            //Setting the selected date
-//            DatePicker(state = datePickerState)
-//        }
-//    }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -448,7 +498,11 @@ fun dateTimePicker(
     onDateSelected: MutableState<Boolean>
 ){
     val datePickerState = rememberDatePickerState()
-    val timePickerState = rememberTimePickerState()
+    val timePickerState = rememberTimePickerState(
+        initialHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+        initialMinute = Calendar.getInstance().get(Calendar.MINUTE),
+        is24Hour = false,
+    )
     var datePicker by remember { mutableStateOf(true) }
     var timePicker by remember { mutableStateOf(false) }
 
@@ -517,7 +571,7 @@ fun dateTimePicker(
                     }
                 }
             ) {
-                    TimePicker(state = timePickerState)
+                    TimeInput(state = timePickerState)
                 }
         }
     }
@@ -777,9 +831,4 @@ fun calculateNettUF(totalUF: String, fillVol: String, initDrain: String): String
     } else {
         ""
     }
-}
-
-fun formatDateTime(calendar: Calendar): String {
-    val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    return format.format(calendar.time)
 }
