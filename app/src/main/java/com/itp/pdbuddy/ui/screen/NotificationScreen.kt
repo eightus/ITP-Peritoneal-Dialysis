@@ -72,7 +72,7 @@ fun NotificationScreenContent(navController: NavController){
                 fontWeight = FontWeight.Medium,
                 color = Color.Black
             )
-            IconButton(
+            Button(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 onClick = {
                     //showTimePicker.value = true
@@ -146,6 +146,7 @@ fun NotificationScreenContent(navController: NavController){
 
             }
         }
+        Text(text ="*You are responsible for updating the notifications and ensuring the prescription amount is correct based on doctor's prescription.")
 
     }
 }

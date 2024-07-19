@@ -257,25 +257,6 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                     cal = timeOnState,
                     onDateSelected = timeOnSelected
                 )
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically
-//                ){
-//                    Text(text = "Treatment Start Time", fontSize = 25.sp)
-//                    Tooltip(message = "Date and Time treatment starts")
-//                }
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically
-//                ){
-//                    if(timeOnSelected.value){
-//                        Text(text = timeOn.value, fontSize = 25.sp)
-//                    }
-//                    IconButton(
-//                        onClick = {
-//                            showTimeOnDatePicker.value = true }
-//                    ) {
-//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
-//                    }
-//                }
                 OutlinedTextField(
                     value = if (timeOnSelected.value) timeOn.value else "",
                     onValueChange = { },
@@ -310,31 +291,13 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                     cal = timeOffState,
                     onDateSelected = timeOffSelected,
                 )
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically
-//                ){
-//                    Text(text = "Treatment End Time", fontSize = 25.sp)
-//                    Tooltip(message = "Date and Time treatment ends")
-//                }
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically
-//                ){
-//                    if(timeOffSelected.value){
-//                        Text(text = timeOff.value, fontSize = 25.sp)
-//                    }
-//                    IconButton(
-//                        onClick = { showTimeOffDatePicker.value = true }
-//                    ) {
-//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
-//                    }
-//                }
                 OutlinedTextField(
                     value = if (timeOffSelected.value) timeOff.value else "",
                     onValueChange = { },
                     label = { Row(
                         verticalAlignment = Alignment.CenterVertically
                     ){
-                        Text("Treatment Start Time")
+                        Text("Treatment End Time")
                     } },
                     modifier = Modifier
                         .fillMaxWidth()

@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -116,30 +117,62 @@ fun NewNotificationScreenContent(navController: NavController){
                 fontWeight = FontWeight.Medium,
                 color = Color.Black
             )
-            Text(text = "Time", fontSize = 25.sp)
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                if(timeState.value){
-                    Text(text = timeFormat.format(calendarState.value.time), fontSize = 25.sp)
+            OutlinedTextField(
+                value = if (timeState.value) timeFormat.format(calendarState.value.time) else "",
+                onValueChange = { },
+                label = { Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text("Time")
+                } },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        showTimePicker.value = !showTimePicker.value
+                    },
+                readOnly = true,
+                singleLine = true,
+                enabled = false,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                trailingIcon = {
+                    Icon(Icons.Filled.CalendarMonth,"contentDescription")
                 }
-
-                IconButton(
-                    onClick = { showTimePicker.value = true }
-                ) {
-                    Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
-                }
-            }
-            Text(text = "Notification Type", fontSize = 25.sp)
+            )
+//            Text(text = "Time", fontSize = 25.sp)
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ){
+////                if(timeState.value){
+////                    Text(text = timeFormat.format(calendarState.value.time), fontSize = 25.sp)
+////                }
+////
+////                IconButton(
+////                    onClick = { showTimePicker.value = true }
+////                ) {
+////                    Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+////                }
+//            }
+//            Text(text = "Notification Type", fontSize = 25.sp)
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = {
                     expanded = !expanded
                 }
             ) {
-                TextField(
+                OutlinedTextField(
                     value = selectedText,
                     onValueChange = {},
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Notification Type")
+                    } },
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
@@ -166,19 +199,46 @@ fun NewNotificationScreenContent(navController: NavController){
             }
             if(selectedText == reminderType[1]){ //Appointment
                 datePicker(showDatePicker, calendarState, dateState)
-                Text(text = "Date", fontSize = 25.sp)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Text(dateFormat.format(calendarState.value.time), fontSize = 25.sp)
-
-                    IconButton(
-                        onClick = {
-                            showDatePicker.value = true }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                Text(text = "Date", fontSize = 25.sp)
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(dateFormat.format(calendarState.value.time), fontSize = 25.sp)
+//
+//                    IconButton(
+//                        onClick = {
+//                            showDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = dateFormat.format(calendarState.value.time),
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Date")
+                    } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showDatePicker.value = !showDatePicker.value
+                        },
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                }
+                )
             } else if(selectedText == reminderType[0]){
                 Row(
                     Modifier.fillMaxWidth(),
@@ -299,7 +359,7 @@ fun timePicker(
     cal: MutableState<Calendar>,
     onTimeSelected: MutableState<Boolean>
 ){
-    val timePickerState = rememberTimePickerState()
+    val timePickerState = rememberTimePickerState(is24Hour = false)
     var timePicker by remember { mutableStateOf(true) }
     if (showTimePicker.value) {
         TimePickerDialog(
@@ -329,7 +389,7 @@ fun timePicker(
                 }
             }
         ) {
-            TimePicker(state = timePickerState)
+            TimeInput(state = timePickerState)
         }
     }
 }

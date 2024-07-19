@@ -64,7 +64,7 @@ class NotificationViewModel @Inject constructor(
             if (currentCalender.after(calenderState.value)){
                 calenderState.value.add(Calendar.DAY_OF_YEAR, 1)
             }
-            message = "It is time to take your medication: ${medicine} ${quantity}${unit}"
+            message = "It is time to take your medication: ${medicine} ${quantity}${unit}. If you taken the medication you can ignore this notification"
             date = "Recurring"
             time = SimpleDateFormat("hh:mm a").format(calenderState.value.time)
         }
