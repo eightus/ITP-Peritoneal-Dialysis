@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.itp.pdbuddy.data.model.Prescription
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
 import com.itp.pdbuddy.ui.viewmodel.ProfileViewModel
 import com.itp.pdbuddy.ui.viewmodel.RecordViewModel
@@ -67,8 +69,8 @@ fun AutoRecordScreen(navController: NavHostController) {
     
     authViewModel.fetchUsername()
 
-
     val autoRecordData by recordViewModel.autoRecord.collectAsState()
+    val prescriptionData by recordViewModel.latestPrescription.collectAsState()
     
     var loading by remember { mutableStateOf(false) }
 //    var infotext by remember {
@@ -115,7 +117,7 @@ fun AutoRecordScreen(navController: NavHostController) {
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
             }
-            is Result.Success -> AutoRecordScreenContent(navController, username, autoRecordData)
+            is Result.Success -> AutoRecordScreenContent(navController, username, autoRecordData, prescriptionData)
             is Result.Failure -> {
                 Text(
                     text = infotext,
@@ -138,7 +140,7 @@ fun AutoRecordScreen(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AutoRecordScreenContent(navController: NavHostController, username: Result<String?>, data: List<Any>) {
+fun AutoRecordScreenContent(navController: NavHostController, username: Result<String?>, data: List<Any>, prescriptionData:Result<Prescription>) {
     val recordViewModel: RecordViewModel = hiltViewModel()
 
     // State Variables
@@ -151,11 +153,11 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
     val timeOffState = remember { mutableStateOf(Calendar.getInstance()) }
     val timeOnSelected = remember{ mutableStateOf(false)}
     val timeOffSelected = remember{ mutableStateOf(false)}
-    var showTherapyDropdown by remember { mutableStateOf(false) }
-    var showColorDropdown by remember { mutableStateOf(false) }
-    var showRedBagDropdown by remember { mutableStateOf(false) }
-    var showWhiteBagDropdown by remember { mutableStateOf(false) }
-    var showBlueBagDropdown by remember { mutableStateOf(false) }
+    val showTherapyDropdown = remember { mutableStateOf(false) }
+    val showColorDropdown = remember { mutableStateOf(false) }
+    val showRedBagDropdown = remember { mutableStateOf(false) }
+    val showWhiteBagDropdown = remember { mutableStateOf(false) }
+    val showBlueBagDropdown = remember { mutableStateOf(false) }
 
     // Dropdown items
     val therapyItems = listOf("CAPD", "APD")
@@ -163,8 +165,8 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
         "Clear Yellow", "Cloudy Yellow", "Red", "Orange", "Rust", "Bright Yellow",
         "Yellow Green", "Green", "Green with Particles", "Brown Green", "Blue/Purple",
         "Clear Brown", "Brown Black", "Milk White", "Peach/Pink")
-    val bagDext = listOf("1.5% Dext", "2.5% Dext", "4.25% Dext")
-    val blueDext = listOf("1.5% Dext", "2.5% Dext", "4.25% Dext", "Others")
+    val bagDext = listOf("1.5% Dextrose", "2.5% Dextrose", "4.25% Dextrose")
+    val blueDext = listOf("1.5% Dextrose", "2.5% Dextrose", "4.25% Dextrose", "Others")
 
     // Formatters
     var dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -247,6 +249,30 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
     //
     val submitResult by recordViewModel.recordResult.collectAsState()
 
+    when (prescriptionData) {
+        is Result.Loading -> {
+
+        }
+        is Result.Success -> {
+            val prescription = (prescriptionData as Result.Success).data
+
+            redBagAmount.value = prescription.solutions[0].bagVolume
+            whiteBagAmount.value = prescription.solutions[1].bagVolume
+            blueBagAmount.value = prescription.solutions[2].bagVolume
+            redBagDext.value = prescription.solutions[0].type
+            whiteBagDext.value = prescription.solutions[1].type
+            blueBagDext.value = prescription.solutions[2].type
+            cycles.value = prescription.numberOfCycles
+
+        }
+        is Result.Failure -> {
+
+        }
+        else -> {
+            // No data
+        }
+    }
+
     Column {
 
         // UI Element
@@ -255,8 +281,8 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
                 .fillMaxSize()
                 .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item {
+        ){
+            item{
                 Text(
                     text = "Manual Entry",
                     fontSize = 50.sp,
@@ -264,415 +290,277 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
                     color = Color.Black
                 )
             }
-            item {
+            item{
                 datePicker(showRecordingDatePicker, recordingDateState)
-                Text(text = "Recording Date", fontSize = 25.sp)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = dateFormat.format(recordingDateState.value.time), fontSize = 25.sp)
-                    IconButton(
-                        onClick = { showRecordingDatePicker.value = true }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                Text(text = "Recording Date", fontSize = 25.sp)
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(text = dateFormat.format(recordingDateState.value.time), fontSize = 25.sp)
+//                    IconButton(
+//                        onClick = { showRecordingDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = dateFormat.format(recordingDateState.value.time),
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Recording Date")
+                    } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showRecordingDatePicker.value = !showRecordingDatePicker.value
+                        },
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                }
-            }
-            item {
-                textNumberBox(
-                    title = "Blood Pressure",
-                    variable = bp,
-                    tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg"
                 )
+            }
+            item{
+                textNumberBox(title = "Blood Pressure (mm/Hg)", variable = bp, tooltipMessage = "Blood Pressure, measured in Systolic/Diastolic mmHg", numeric = false)
 
             }
-            item {
-                textNumberBox(
-                    title = "Heart Rate",
-                    variable = hr,
-                    tooltipMessage = "Heart Rate, measured in BPM"
-                )
+            item{
+                textNumberBox(title = "Heart Rate (bpm)", variable = hr, tooltipMessage = "Heart Rate, measured in BPM")
             }
-            item {
-                textNumberBox(
-                    title = "Weight",
-                    variable = weight,
-                    tooltipMessage = "Weight, measured in KG"
-                )
+            item{
+                textNumberBox(title = "Weight (Kg)", variable = weight, tooltipMessage = "Weight, measured in KG")
             }
-            item {
-                textNumberBox(
-                    title = "Urine Output",
-                    variable = uo,
-                    tooltipMessage = "Urine Output, measured in mL"
-                )
+            item{
+                textNumberBox(title = "Urine Output (mL)", variable = uo, tooltipMessage = "Urine Output, measured in mL")
             }
-            item {
+            item{
                 dateTimePicker(
                     showDatePicker = showTimeOnDatePicker,
                     cal = timeOnState,
                     onDateSelected = timeOnSelected
                 )
-                Text(text = "Time on", fontSize = 25.sp)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(text = formattedTimeOn.value, fontSize = 25.sp)
-
-                    IconButton(
-                        onClick = {
-                            showTimeOnDatePicker.value = true
-                        }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(text = "Treatment Start Time", fontSize = 25.sp)
+//                    Tooltip(message = "Date and Time treatment starts")
+//                }
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    if(timeOnSelected.value){
+//                        Text(text = timeOn.value, fontSize = 25.sp)
+//                    }
+//                    IconButton(
+//                        onClick = {
+//                            showTimeOnDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = if (timeOnSelected.value) timeOn.value else "",
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Treatment Start Time")
+                    } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showTimeOnDatePicker.value = !showTimeOnDatePicker.value
+                        },
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                }
+                )
             }
-            item {
+            item{
                 dateTimePicker(
                     showDatePicker = showTimeOffDatePicker,
                     cal = timeOffState,
                     onDateSelected = timeOffSelected,
                 )
-                Text(text = "Time off", fontSize = 25.sp)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(
-                        text = formattedTimeOff.value,
-                        fontSize = 25.sp
-                    )
-
-                    IconButton(
-                        onClick = { showTimeOffDatePicker.value = true }
-                    ) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
-                    }
-                }
-            }
-            item {
-                Divider(modifier = Modifier.height(5.dp))
-            }
-            item {
-                Box(
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    Text(text = "Treatment End Time", fontSize = 25.sp)
+//                    Tooltip(message = "Date and Time treatment ends")
+//                }
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ){
+//                    if(timeOffSelected.value){
+//                        Text(text = timeOff.value, fontSize = 25.sp)
+//                    }
+//                    IconButton(
+//                        onClick = { showTimeOffDatePicker.value = true }
+//                    ) {
+//                        Icon(Icons.Filled.CalendarMonth, contentDescription = "Calender")
+//                    }
+//                }
+                OutlinedTextField(
+                    value = if (timeOffSelected.value) timeOff.value else "",
+                    onValueChange = { },
+                    label = { Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text("Treatment Start Time")
+                    } },
                     modifier = Modifier
-                        .clickable { showRedBagDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = redBagDext.value,
-                        onValueChange = { },
-                        label = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Heater Bag")
-                                Tooltip(message = "Type Of Red Heater Bag used")
-                            }
+                        .fillMaxWidth()
+                        .clickable {
+                            showTimeOffDatePicker.value = !showTimeOffDatePicker.value
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showRedBagDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showRedBagDropdown,
-                        onDismissRequest = { showRedBagDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        bagDext.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                redBagDext.value = item
-                                showRedBagDropdown = false
-                            })
-                        }
+                    readOnly = true,
+                    singleLine = true,
+                    enabled = false,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                    trailingIcon = {
+                        Icon(Icons.Filled.CalendarMonth,"contentDescription")
                     }
-                }
-            }
-            item {
-                textNumberBox(
-                    title = "Amount",
-                    variable = redBagAmount,
-                    tooltipMessage = "Amount of Red Heater Bag used"
                 )
             }
-            item {
+            item{
                 Divider(modifier = Modifier.height(5.dp))
             }
-            item {
-                Box(
-                    modifier = Modifier
-                        .clickable { showWhiteBagDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = whiteBagDext.value,
-                        onValueChange = { },
-                        label = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Supply Bag")
-                                Tooltip(message = "Type of White Supply Bag used")
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showWhiteBagDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showWhiteBagDropdown,
-                        onDismissRequest = { showWhiteBagDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        bagDext.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                whiteBagDext.value = item
-                                showWhiteBagDropdown = false
-                            })
-                        }
-                    }
-                }
+            item{
+                dropdownBox(title = "Heater Bag", variable = redBagDext, showDropdown = showRedBagDropdown, dropdownItems = bagDext, tooltipMessage = "Type Of Red Heater Bag used")
             }
-            item {
-                textNumberBox(
-                    title = "Amount",
-                    variable = whiteBagAmount,
-                    tooltipMessage = "Amount of White Supply Bag used"
-                )
+            item{
+                textNumberBox(title = "Amount", variable = redBagAmount, tooltipMessage = "Amount of Red Heater Bag used")
             }
-            item {
+            item{
                 Divider(modifier = Modifier.height(5.dp))
             }
-            item {
-                Box(
-                    modifier = Modifier
-                        .clickable { showBlueBagDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = blueBagDext.value,
-                        onValueChange = { },
-                        label = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Last Bag")
-                                Tooltip(message = "Type of Blue Last Bag used")
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showBlueBagDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showBlueBagDropdown,
-                        onDismissRequest = { showBlueBagDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        blueDext.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                blueBagDext.value = item
-                                showBlueBagDropdown = false
-                            })
-                        }
-                    }
+            item{
+                dropdownBox(title = "Supply Bag", variable = whiteBagDext, showDropdown = showWhiteBagDropdown, dropdownItems = bagDext, tooltipMessage = "Type of White Supply Bag used")
+            }
+            item{
+                textNumberBox(title = "Amount", variable = whiteBagAmount, tooltipMessage = "Amount of White Supply Bag used")
+            }
+            item{
+                Divider(modifier = Modifier.height(5.dp))
+            }
+            item{
+                dropdownBox(title = "Last Bag", variable = blueBagDext, showDropdown = showBlueBagDropdown, dropdownItems = blueDext, tooltipMessage = "Type of Blue Last Bag used")
+            }
+            if (blueBagDext.value == "Others"){
+                item{
+                    textNumberBox(title = "Type (Others)", variable = blueBagType, tooltipMessage = "If Others, state the type", numeric = false)
                 }
             }
-            if (blueBagDext.value == "Others") {
-                item {
-                    textNumberBox(
-                        title = "Type (Others)",
-                        variable = blueBagType,
-                        numeric = false,
-                        tooltipMessage = "If Others, state the type"
-                    )
-                }
+            item{
+                textNumberBox(title = "Amount", variable = blueBagAmount, tooltipMessage = "Amount of Blue Last Bag used")
             }
-            item {
-                textNumberBox(
-                    title = "Amount",
-                    variable = blueBagAmount,
-                    tooltipMessage = "Amount of Blue Last Bag used"
-                )
-            }
-            item {
+            item{
                 Divider(modifier = Modifier.height(2.dp))
             }
-            item {
+            item{
                 //textNumberBox(title = "Type of Therapy", variable = therapy, numeric = false)
-                Box(
-                    modifier = Modifier
-                        .clickable { showTherapyDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = therapy.value,
-                        onValueChange = { },
-                        label = { Text("Therapy Type") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showTherapyDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showTherapyDropdown,
-                        onDismissRequest = { showTherapyDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        therapyItems.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                therapy.value = item
-                                showTherapyDropdown = false
-                            })
-                        }
-                    }
-                }
-            }
-            item {
-                textNumberBox(title = "Total Volume", variable = totalVolume)
-            }
-            item {
-                textNumberBox(
-                    title = "Target UF for Tidal (If applicable)",
-                    variable = targetUF,
-                    numeric = false
+                dropdownBox(
+                    title = "Therapy Type",
+                    variable = therapy,
+                    showDropdown = showTherapyDropdown,
+                    dropdownItems = therapyItems,
                 )
             }
-            item {
-                textNumberBox(title = "Therapy Time (In Hours)", variable = therapyTime)
+            item{
+                textNumberBox(title = "Total Volume (mL)", variable = totalVolume, tooltipMessage = "Volume of <>, measured in mL")
             }
-            item {
-                textNumberBox(title = "Fill Volume (In mL)", variable = fillVol)
+            item{
+                textNumberBox(title = "Target UF for Tidal (If applicable)", variable = targetUF, numeric = false, tooltipMessage = "If not applicable, leave this field empty")
             }
-            item {
-                textNumberBox(title = "Last Fill Volume (In mL)", variable = lastFillVol)
+            item{
+                textNumberBox(title = "Therapy Time", variable = therapyTime, tooltipMessage = "Total duration of treatment, measured in Hours")
             }
-            item {
-                textNumberBox(title = "Dextrose % Conc", variable = dextCon, numeric = false)
+            item{
+                textNumberBox(title = "Fill Volume (mL)", variable = fillVol, tooltipMessage = "Measured in mL")
             }
-            item {
-                textNumberBox(title = "No. of Cycles", variable = cycles)
+            item{
+                textNumberBox(title = "Last Fill Volume (mL)", variable = lastFillVol, tooltipMessage = "Measured in mL")
             }
-            item {
-                textNumberBox(title = "Initial Drain", variable = initDrain)
+            item{
+                textNumberBox(title = "Dextrose % Conc", variable = dextCon, numeric = false, tooltipMessage = "% concentration od Dextrose used")
             }
-            item {
-                textNumberBox(title = "Average Dwell Time", variable = avgDwellTime)
+            item{
+                textNumberBox(title = "No. of Cycles", variable = cycles, numeric = false)
             }
-            item {
-                Box(
-                    modifier = Modifier
-                        .clickable { showColorDropdown = true }
-                        .fillMaxWidth(),
-
-                    //            .clickable { showDropdown = !showDropdown },
-                ) {
-                    OutlinedTextField(
-                        value = colorDrain.value,
-                        onValueChange = { },
-                        label = { Text("Colour of Drainage") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusEvent { showColorDropdown = it.isFocused },
-                        readOnly = true,
-                        singleLine = true
-                    )
-                    DropdownMenu(
-                        expanded = showColorDropdown,
-                        onDismissRequest = { showColorDropdown = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        dischargeColor.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                                colorDrain.value = item
-                                showColorDropdown = false
-                            })
-                        }
-                    }
-
-                }
+            item{
+                textNumberBox(title = "Initial Drain (mL)", variable = initDrain, tooltipMessage = "Measured in mL")
             }
-            item {
+            item{
+                textNumberBox(title = "Average Dwell Time (H)", variable = avgDwellTime, tooltipMessage = "Measured in Hours")
+            }
+            item{
+                dropdownBox(title = "Colour of Drainage", variable = colorDrain, showDropdown = showColorDropdown, dropdownItems = dischargeColor)
+            }
+            item{
                 Divider(modifier = Modifier.height(2.dp))
             }
-            item {
-                textNumberBox(title = "Total UF (In mL)", variable = totalUF)
+            item{
+                textNumberBox(title = "Total UF (mL)", variable = totalUF, tooltipMessage = "Measured in mL")
             }
-            item {
+            item{
                 Divider(modifier = Modifier.height(2.dp))
             }
-            item {
-                textNumberBox(title = "Nett UF (In mL)", variable = nettUF)
+            item{
+                textNumberBox(title = "Nett UF (mL)", variable = nettUF, tooltipMessage = "Measured in mL, calculated using Nett UF = (Initial Drain - Last Fill Volume) + Total UF")
             }
-            item {
+            item{
                 Divider(modifier = Modifier.height(2.dp))
             }
-            item {
+            item{
                 textNumberBox(title = "Remarks", variable = remarks, numeric = false)
             }
-            item {
+            item{
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Button(onClick = {
-                        recordViewModel.submitRecord(
-                            usernameText, listOf(
-                                recordingDate,
-                                bp.value,
-                                hr.value,
-                                weight.value,
-                                uo.value,
-                                timeOn.value,
-                                timeOff.value,
-                                redBagDext.value,
-                                redBagAmount.value,
-                                whiteBagDext.value,
-                                whiteBagAmount.value,
-                                blueBagDext.value,
-                                blueBagAmount.value,
-                                blueBagFormatter.value,
-                                therapy.value,
-                                totalVolume.value,
-                                targetUF.value,
-                                therapyTime.value,
-                                fillVol.value,
-                                lastFillVol.value,
-                                dextCon.value,
-                                cycles.value,
-                                initDrain.value,
-                                avgDwellTime.value,
-                                colorDrain.value,
-                                totalUF.value,
-                                nettUF.value,
-                                remarks.value
-                            )
-                        )
-                    }) {
+                ){
+                    Button(onClick = { recordViewModel.submitRecord(
+                        usernameText,listOf(
+                            recordingDate, bp.value, hr.value, weight.value, uo.value,
+                            timeOn.value, timeOff.value, redBagDext.value, redBagAmount.value, whiteBagDext.value,
+                            whiteBagAmount.value, blueBagDext.value, blueBagAmount.value, blueBagFormatter.value, therapy.value,
+                            totalVolume.value, targetUF.value, therapyTime.value, fillVol.value, lastFillVol.value,
+                            dextCon.value, cycles.value, initDrain.value, avgDwellTime.value, colorDrain.value,
+                            totalUF.value, nettUF.value, remarks.value)
+                    ) }) {
                         Text(text = "Submit")
                     }
                     when (submitResult) {
                         is Result.Loading -> {
                             CircularProgressIndicator()
                         }
-
                         is Result.Success -> {
                             // Navigate to home screen on success
                             LaunchedEffect(Unit) {
@@ -681,23 +569,16 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
                                 }
                             }
                         }
-
                         is Result.Failure -> {
                             Text(
                                 text = "Failed: ${(submitResult as Result.Failure).exception.message}",
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
-
-                        is Result.Idle -> {
-                            Text("")
-                        }
+                        is Result.Idle -> { Text("") }
                     }
-
                 }
-
             }
-
         }
     }
 }
