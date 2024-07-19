@@ -68,8 +68,9 @@ class TravelRequestViewModel @Inject constructor(
         travelEndDate: String,
         supplyRequests: List<SupplyRequest>,
         totalPrice: Double,
-        orderDate: String
-    ) {
+        orderDate: String,
+        deliveryTime: String,
+        ) {
         val username = _username.value
         withContext(Dispatchers.IO) {
             travelRepository.submitTravelRequest(
@@ -80,18 +81,22 @@ class TravelRequestViewModel @Inject constructor(
                 supplyRequests = supplyRequests,
                 username = username,
                 totalPrice = totalPrice,
-                orderDate = orderDate
+                orderDate = orderDate,
+                deliveryTime = deliveryTime,
+                status = "Not Delivered"
             )
         }
     }
 
     data class PastRequest(
-        val id: String,
-        val orderDate: String,
-        val country: String,
-        val hotelAddress: String,
-        val travelDates: String,
-        val totalPrice: Double,
-        val supplyRequests: List<SupplyRequest>
+        val id: String = "",
+        val orderDate: String = "",
+        val country: String = "",
+        val hotelAddress: String = "",
+        val travelDates: String = "",
+        val totalPrice: Double = 0.0,
+        val deliveryTime: String = "",
+        val status: String = "",
+        val supplyRequests: List<SupplyRequest> = emptyList()
     )
 }
