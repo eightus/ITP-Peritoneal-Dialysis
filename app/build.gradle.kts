@@ -27,7 +27,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.18.20:8000/\"")
+            buildConfigField("String", "BASE_URL", "\"https://itp.augustustan.com/\"")
         }
         release {
             buildConfigField("String", "BASE_URL", "\"https://itp.augustustan.com/\"")
