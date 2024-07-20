@@ -1,4 +1,5 @@
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -33,6 +34,7 @@ fun ProfileScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var birthdate by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
+    var dryWeight by remember { mutableStateOf("") }
 
     // State to manage edit mode
     var isEditing by remember { mutableStateOf(false) }
@@ -48,6 +50,7 @@ fun ProfileScreen(navController: NavHostController) {
                     email = it["email"] as? String ?: ""
                     birthdate = it["birthdate"] as? String ?: ""
                     gender = it["gender"] as? String ?: ""
+                    dryWeight = it["dryWeight"].toString()
                 }
             }
             else -> {
@@ -64,10 +67,13 @@ fun ProfileScreen(navController: NavHostController) {
         email = email,
         birthdate = birthdate,
         gender = gender,
+        dryWeight = dryWeight,
         isEditing = isEditing,
         onEditButtonClick = { isEditing = !isEditing },
         onSaveButtonClick = {
-            profileViewModel.updateUserInfo(name, address, phone, email, birthdate, gender)
+            profileViewModel.updateUserInfo(
+                name, address, phone, email, birthdate, gender, dryWeight.toFloatOrNull() ?: 0f
+            )
             isEditing = false
         },
         onNameChange = { name = it },
@@ -75,7 +81,8 @@ fun ProfileScreen(navController: NavHostController) {
         onPhoneChange = { phone = it },
         onEmailChange = { email = it },
         onBirthdateChange = { birthdate = it },
-        onGenderChange = { gender = it }
+        onGenderChange = { gender = it },
+        onDryWeightChange = { dryWeight = it }
     )
 }
 
@@ -103,7 +110,6 @@ fun EditableTextField(
     )
 }
 
-
 @Composable
 fun ProfileContent(
     name: String,
@@ -112,6 +118,7 @@ fun ProfileContent(
     email: String,
     birthdate: String,
     gender: String,
+    dryWeight: String,
     isEditing: Boolean,
     onEditButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
@@ -120,7 +127,8 @@ fun ProfileContent(
     onPhoneChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onBirthdateChange: (String) -> Unit,
-    onGenderChange: (String) -> Unit
+    onGenderChange: (String) -> Unit,
+    onDryWeightChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -169,6 +177,13 @@ fun ProfileContent(
             value = gender,
             onValueChange = onGenderChange,
             label = { Text("Gender") },
+            readOnly = !isEditing
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        EditableTextField(
+            value = dryWeight,
+            onValueChange = onDryWeightChange,
+            label = { Text("Dry Weight") },
             readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
