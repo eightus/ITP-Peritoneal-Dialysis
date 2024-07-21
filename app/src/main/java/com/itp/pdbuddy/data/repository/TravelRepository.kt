@@ -53,8 +53,10 @@ class TravelRepository @Inject constructor() {
         supplyRequests: List<SupplyRequest>,
         username: String?,
         totalPrice: Double,
-        orderDate: String
-    ) {
+        orderDate: String,
+        deliveryTime: String,
+        status: String
+        ) {
         val travelDates = "$travelStartDate - $travelEndDate"
         val request = hashMapOf(
             "country" to country,
@@ -63,6 +65,8 @@ class TravelRepository @Inject constructor() {
             "username" to username,
             "totalPrice" to totalPrice,
             "orderDate" to orderDate,
+            "deliveryTime" to deliveryTime,
+            "status" to status,
             "supplies" to supplyRequests.map { supply ->
                 mapOf(
                     "name" to supply.name,
@@ -103,13 +107,13 @@ class TravelRepository @Inject constructor() {
                 .await()
 
             snapshot.documents.mapNotNull { document ->
-                val supplyRequests = (document.get("supplies") as List<Map<String, Any>>).map {
+                val supplyRequests = (document.get("supplies") as? List<Map<String, Any>>)?.map {
                     SupplyRequest(
                         name = it["name"] as String,
                         quantity = (it["quantity"] as Long).toInt(),
                         price = (it["price"] as? Double) ?: 0.0 // Default to 0.0 if price is null
                     )
-                }
+                } ?: emptyList()
 
                 PastRequest(
                     id = document.id,
@@ -118,7 +122,9 @@ class TravelRepository @Inject constructor() {
                     hotelAddress = document.getString("hotelAddress") ?: "",
                     travelDates = document.getString("travelDates") ?: "",
                     totalPrice = document.getDouble("totalPrice") ?: 0.0, // Default to 0.0 if totalPrice is null
-                    supplyRequests = supplyRequests
+                    supplyRequests = supplyRequests,
+                    status = document.getString("status") ?: "", // Include status field
+                    deliveryTime = document.getString("deliveryTime") ?: "" // Include deliveryTime field
                 )
             }
         } catch (e: Exception) {

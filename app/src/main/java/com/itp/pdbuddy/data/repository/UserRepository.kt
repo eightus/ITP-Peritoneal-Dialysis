@@ -18,8 +18,9 @@ class UserRepository @Inject constructor(
         phone: String,
         email: String,
         birthdate: String,
-        gender: String
+        gender: String,
+        dryWeight: Float
     ): Result<Unit> {
-        return userDataSource.updateUserInfo(name, address, phone, email, birthdate, gender)
+        return userDataSource.updateUserInfo(name, address, phone, email, birthdate, gender, dryWeight)
     }
 }

@@ -84,13 +84,12 @@ fun LoginScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Heart image
+            // Kidney image
             Image(
-                painter = painterResource(id = R.drawable.splash_heart),
-                contentDescription = "Heart Logo",
-                modifier = Modifier.size(80.dp)
+                painter = painterResource(id = R.drawable.kidney),
+                contentDescription = "Kidney Logo",
+                modifier = Modifier.size(120.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
             // App name
             Text(
                 text = "PDBuddy",
