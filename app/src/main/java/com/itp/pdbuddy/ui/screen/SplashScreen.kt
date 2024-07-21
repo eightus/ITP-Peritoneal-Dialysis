@@ -48,11 +48,10 @@ fun SplashScreen(navController: NavController) {
         ) {
             // Heart image
             Image(
-                painter = painterResource(id = R.drawable.splash_heart),
-                contentDescription = "Heart Logo",
-                modifier = Modifier.size(100.dp)
+                painter = painterResource(id = R.drawable.kidney),
+                contentDescription = "Kidney Logo",
+                modifier = Modifier.size(200.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
             // App name
             Text(
                 text = "PDBuddy",

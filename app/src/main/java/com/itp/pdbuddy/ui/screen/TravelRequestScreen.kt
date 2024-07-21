@@ -1,13 +1,13 @@
 package com.itp.pdbuddy.ui.screen
 
-import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import android.widget.TimePicker
+import android.app.TimePickerDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
@@ -28,6 +28,7 @@ import com.itp.pdbuddy.ui.viewmodel.TravelRequestViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 
+
 @Composable
 fun TravelRequestScreen(navController: NavHostController, viewModel: TravelRequestViewModel = hiltViewModel()) {
     var country by remember { mutableStateOf("") }
@@ -35,6 +36,7 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
     var travelStartDate by remember { mutableStateOf("") }
     var travelEndDate by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var deliveryTime by remember { mutableStateOf("") }
     val orderDate = remember {
         "${Calendar.getInstance().get(Calendar.DAY_OF_MONTH)}/${Calendar.getInstance().get(Calendar.MONTH) + 1}/${Calendar.getInstance().get(Calendar.YEAR)}"
     }
@@ -72,6 +74,19 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+    val timePickerDialog = remember {
+        TimePickerDialog(
+            context,
+            { _: TimePicker, hourOfDay: Int, minute: Int ->
+                val formattedHour = if (hourOfDay < 10) "0$hourOfDay" else "$hourOfDay"
+                val formattedMinute = if (minute < 10) "0$minute" else "$minute"
+                deliveryTime = "$formattedHour:$formattedMinute"
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
         )
     }
 
@@ -113,7 +128,7 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
     ) {
         item {
             Text(
-                text = "Submit Travel Request",
+                text = "Submit Travel Form",
                 fontSize = 24.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -177,6 +192,29 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
             if (travelEndDate.isNotEmpty()) {
                 Text(
                     text = "Selected End Date: $travelEndDate",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .clickable { timePickerDialog.show() }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = "Select Delivery Time",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text("Delivery Time", fontSize = 16.sp)
+            }
+
+            if (deliveryTime.isNotEmpty()) {
+                Text(
+                    text = "Selected Delivery Time: $deliveryTime",
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -255,7 +293,7 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
 
             Button(
                 onClick = {
-                    if (country.isNotEmpty() && hotelAddress.isNotEmpty() && travelStartDate.isNotEmpty() && travelEndDate.isNotEmpty()) {
+                    if (country.isNotEmpty() && hotelAddress.isNotEmpty() && travelStartDate.isNotEmpty() && travelEndDate.isNotEmpty() && deliveryTime.isNotEmpty()) {
                         coroutineScope.launch {
                             viewModel.submitTravelRequest(
                                 country = country,
@@ -266,7 +304,8 @@ fun TravelRequestScreen(navController: NavHostController, viewModel: TravelReque
                                     supply.copy(quantity = quantityMap[supply.name] ?: 0)
                                 },
                                 totalPrice = totalPrice,
-                                orderDate = orderDate
+                                orderDate = orderDate,
+                                deliveryTime = deliveryTime
                             )
                             navController.navigate("SuccessPaymentTravelScreen")
                         }

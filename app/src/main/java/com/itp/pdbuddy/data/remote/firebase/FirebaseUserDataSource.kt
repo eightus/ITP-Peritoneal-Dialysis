@@ -20,7 +20,6 @@ class FirebaseUserDataSource @Inject constructor(): UserDataSource {
             val records = querySnapshot.documents.map { documentSnapshot ->
                 documentSnapshot.data ?: emptyMap()
             }
-
             Result.Success(records)
         } catch (e: Exception) {
             Log.e("FirebaseUserDataSource", "Error fetching user info", e)
@@ -34,7 +33,8 @@ class FirebaseUserDataSource @Inject constructor(): UserDataSource {
         phone: String,
         email: String,
         birthdate: String,
-        gender: String
+        gender: String,
+        dryWeight: Float
     ): Result<Unit> {
         return try {
             val userQuerySnapshot = db.collection("users")
@@ -51,6 +51,7 @@ class FirebaseUserDataSource @Inject constructor(): UserDataSource {
                 userData["email"] = email
                 userData["birthdate"] = birthdate
                 userData["gender"] = gender
+                userData["dryWeight"] = dryWeight
 
                 // Perform update
                 db.collection("users").document(document.id)

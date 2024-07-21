@@ -12,6 +12,7 @@ interface UserDataSource {
         phone: String,
         email: String,
         birthdate: String,
-        gender: String
+        gender: String,
+        dryWeight: Float
     ): Result<Unit>
 }

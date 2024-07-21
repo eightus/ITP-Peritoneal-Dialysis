@@ -60,11 +60,12 @@ class ProfileViewModel @Inject constructor(
         phone: String,
         email: String,
         birthdate: String,
-        gender: String
+        gender: String,
+        dryWeight: Float
     ) {
         viewModelScope.launch {
             try {
-                val result = userRepository.updateUserInfo(name, address, phone, email, birthdate, gender)
+                val result = userRepository.updateUserInfo(name, address, phone, email, birthdate, gender, dryWeight)
                 authRepository.updateDisplayName(name)
                 // Optionally, you can refresh the user data after updating
                 if (result is Result.Success) {

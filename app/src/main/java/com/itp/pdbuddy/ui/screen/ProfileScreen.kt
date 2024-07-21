@@ -1,4 +1,7 @@
 import android.annotation.SuppressLint
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +37,7 @@ fun ProfileScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var birthdate by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
+    var dryWeight by remember { mutableStateOf("") }
 
     // State to manage edit mode
     var isEditing by remember { mutableStateOf(false) }
@@ -48,6 +53,7 @@ fun ProfileScreen(navController: NavHostController) {
                     email = it["email"] as? String ?: ""
                     birthdate = it["birthdate"] as? String ?: ""
                     gender = it["gender"] as? String ?: ""
+                    dryWeight = it["dryWeight"].toString()
                 }
             }
             else -> {
@@ -64,10 +70,13 @@ fun ProfileScreen(navController: NavHostController) {
         email = email,
         birthdate = birthdate,
         gender = gender,
+        dryWeight = dryWeight,
         isEditing = isEditing,
         onEditButtonClick = { isEditing = !isEditing },
         onSaveButtonClick = {
-            profileViewModel.updateUserInfo(name, address, phone, email, birthdate, gender)
+            profileViewModel.updateUserInfo(
+                name, address, phone, email, birthdate, gender, dryWeight.toFloatOrNull() ?: 0f
+            )
             isEditing = false
         },
         onNameChange = { name = it },
@@ -75,7 +84,8 @@ fun ProfileScreen(navController: NavHostController) {
         onPhoneChange = { phone = it },
         onEmailChange = { email = it },
         onBirthdateChange = { birthdate = it },
-        onGenderChange = { gender = it }
+        onGenderChange = { gender = it },
+        onDryWeightChange = { dryWeight = it }
     )
 }
 
@@ -103,7 +113,6 @@ fun EditableTextField(
     )
 }
 
-
 @Composable
 fun ProfileContent(
     name: String,
@@ -112,6 +121,7 @@ fun ProfileContent(
     email: String,
     birthdate: String,
     gender: String,
+    dryWeight: String,
     isEditing: Boolean,
     onEditButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
@@ -120,8 +130,12 @@ fun ProfileContent(
     onPhoneChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onBirthdateChange: (String) -> Unit,
-    onGenderChange: (String) -> Unit
+    onGenderChange: (String) -> Unit,
+    onDryWeightChange: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -172,12 +186,19 @@ fun ProfileContent(
             readOnly = !isEditing
         )
         Spacer(modifier = Modifier.height(8.dp))
+        EditableTextField(
+            value = dryWeight,
+            onValueChange = onDryWeightChange,
+            label = { Text("Dry Weight") },
+            readOnly = !isEditing
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         if (isEditing) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                Button(onClick = onSaveButtonClick) {
+                Button(onClick = { showDialog = true }) {
                     Text(text = "Save")
                 }
                 Button(onClick = onEditButtonClick) {
@@ -188,6 +209,28 @@ fun ProfileContent(
             Button(onClick = onEditButtonClick) {
                 Text(text = "Edit")
             }
+        }
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(text = "Confirm Save") },
+                text = { Text(text = "Are you sure you want to save the changes?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onSaveButtonClick()
+                        Toast.makeText(context, "Profile saved successfully!", Toast.LENGTH_SHORT).show()
+                        showDialog = false
+                    }) {
+                        Text(text = "Yes")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text(text = "No")
+                    }
+                }
+            )
         }
     }
 }

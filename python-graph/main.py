@@ -1,6 +1,3 @@
-"""
-Main application entry point for the FastAPI server.
-"""
 import pandas as pd
 
 import uvicorn
@@ -89,7 +86,7 @@ async def add_record(record: Record):
         print(e)
         raise HTTPException(status_code=401, detail="Authentication failed")
 
-def generate_graph(name: str, field: str):
+def generate_graph(name: str, field: str, dry_weight: float = None):
     records_ref = db.collection('Record')
     query = records_ref.where(filter=FieldFilter('Name', '==', name)).order_by('RecordDate', direction=firestore.Query.DESCENDING).limit(10)
     docs = query.stream()
@@ -110,12 +107,17 @@ def generate_graph(name: str, field: str):
 
     # Generate the plot
     plt.figure(figsize=(6, 4)) 
-    plt.plot(formatted_dates, values, marker='o', linestyle='-', color='b')
+    plt.plot(formatted_dates, values, marker='o', linestyle='-', color='b', label=field)
+    
+    if dry_weight is not None:
+        plt.axhline(y=dry_weight, color='r', linestyle='--', label='Dry Weight')
+    
     plt.xlabel('Date', fontsize=12)
     plt.ylabel(field, fontsize=12)
     plt.xticks(rotation=45, fontsize=10)
     plt.yticks(fontsize=10)
     plt.grid(True)
+    plt.legend()
     plt.tight_layout()
 
     # Save the plot to a BytesIO object
@@ -264,7 +266,16 @@ async def weight_graph(request: TokenRequest):
         decoded_token = auth.verify_id_token(request.token, clock_skew_seconds=10)
         name = decoded_token['name']
         
-        img_base64 = generate_graph(name, "Weight")
+        # Fetch the user's dry weight from Firestore
+        user_doc = db.collection('users')
+        query = user_doc.where(filter=FieldFilter('username', '==', name)).limit(1).get()
+        if not query:
+            raise HTTPException(status_code=401, detail="Authentication failed")
+
+        user_data = query[0].to_dict()
+        dry_weight = user_data.get("dryWeight", 0)
+        
+        img_base64 = generate_graph(name, "Weight", dry_weight=dry_weight)
         
         return {"image": img_base64}
     except Exception as e:
