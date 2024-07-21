@@ -48,14 +48,6 @@ fun DietScreen(
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text (
-                text = "For individuals undergoing peritoneal dialysis, " +
-                        "it's crucial to maintain a balanced diet to manage electrolyte levels and " +
-                        "minimize waste buildup. Here are some dietary recommendations",
-                fontSize = 18.sp,
-                color = PDBuddyTheme.customColors.strongTextColor
-            )
             Spacer(modifier = Modifier.height(30.dp))
             resources.filter { it.type == "diet" }.forEach { resource ->
                 //val imageRes2 = resourcesImageMap[normalizeTitle(resource.title)] ?: R.drawable.splash_heart

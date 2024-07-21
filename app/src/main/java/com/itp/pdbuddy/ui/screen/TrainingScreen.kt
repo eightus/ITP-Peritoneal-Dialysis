@@ -48,14 +48,6 @@ fun TrainingScreen(navController: NavHostController, resourcesViewModel: Resourc
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text (
-                text = "Training resource provides clear guidance on peritoneal dialysis (PD), " +
-                        "explaining the procedure for patients with simple explanations and visuals, " +
-                        "aiming to improve patient outcomes and quality of life",
-                fontSize = 18.sp,
-                color = PDBuddyTheme.customColors.strongTextColor
-            )
             Spacer(modifier = Modifier.height(30.dp))
             resources.filter { it.type == "training" }.forEach { resource ->
                 Button(

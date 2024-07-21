@@ -51,13 +51,7 @@ fun AdditionalMaterialScreen(navController: NavHostController, resourcesViewMode
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text (
-                text = "PD Essential Guides covers various topics such as how to shower while on peritoneal " +
-                        "dialysis, choosing the right bag to use, and an education video to learn more.",
-                fontSize = 18.sp,
-                color = PDBuddyTheme.customColors.strongTextColor
-            )
+
             Spacer(modifier = Modifier.height(25.dp))
             resources.filter { it.type == "additionalmaterial" }.forEach { resource ->
                 Button(
