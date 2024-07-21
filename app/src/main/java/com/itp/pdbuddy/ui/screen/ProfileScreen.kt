@@ -1,5 +1,7 @@
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -130,6 +133,9 @@ fun ProfileContent(
     onGenderChange: (String) -> Unit,
     onDryWeightChange: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -192,7 +198,7 @@ fun ProfileContent(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                Button(onClick = onSaveButtonClick) {
+                Button(onClick = { showDialog = true }) {
                     Text(text = "Save")
                 }
                 Button(onClick = onEditButtonClick) {
@@ -203,6 +209,28 @@ fun ProfileContent(
             Button(onClick = onEditButtonClick) {
                 Text(text = "Edit")
             }
+        }
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(text = "Confirm Save") },
+                text = { Text(text = "Are you sure you want to save the changes?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onSaveButtonClick()
+                        Toast.makeText(context, "Profile saved successfully!", Toast.LENGTH_SHORT).show()
+                        showDialog = false
+                    }) {
+                        Text(text = "Yes")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text(text = "No")
+                    }
+                }
+            )
         }
     }
 }
