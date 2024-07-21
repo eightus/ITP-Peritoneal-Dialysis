@@ -8,7 +8,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
@@ -32,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -41,35 +39,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Timestamp
 import com.itp.pdbuddy.ui.theme.PDBuddyTheme
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
+import com.itp.pdbuddy.ui.viewmodel.HomeViewModel
 import com.itp.pdbuddy.ui.viewmodel.NetworkViewModel
+import com.itp.pdbuddy.ui.viewmodel.ProfileViewModel
 import com.itp.pdbuddy.utils.Result
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun HomeScreen(navController: NavController) {
     val authViewModel: AuthViewModel = hiltViewModel()
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
     val username by authViewModel.username.collectAsState()
+    val announcement by homeViewModel.announcement.collectAsState()
+    val userData by profileViewModel.userData.collectAsState()
+    val qotd by homeViewModel.qotd.collectAsState()
     LaunchedEffect(Unit) {
         authViewModel.fetchUsername()
+        homeViewModel.getAnnouncement()
+        profileViewModel.loadInfo()
+        homeViewModel.getQOTD()
     }
-    HomeScreenContent(navController = navController, username = username)
+    HomeScreenContent(navController = navController, username = username, announcement = announcement, userData = userData, qotd = qotd)
 }
 
 @Composable
-fun HomeScreenContent(navController: NavController, username: Result<String?>) {
+fun HomeScreenContent(navController: NavController, username: Result<String?>, announcement: Result<String>, userData: Result<List<Map<String, Any>>>, qotd: Result<String>) {
     val profileItems = listOf(
         ProfileItem(Icons.TwoTone.Inventory2, "Supplies") {
             navController.navigate("supplies")
@@ -102,7 +110,7 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(MaterialTheme.colorScheme.background) // Light background color
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.Start
     ) {
@@ -119,8 +127,14 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
         Spacer(modifier = Modifier.height(8.dp))
 
         // Quote of the Day
+        val qotdText = when (qotd) {
+            is Result.Idle -> "Loading..."
+            is Result.Loading -> "Loading..."
+            is Result.Success -> qotd.data
+            is Result.Failure -> "No announcement."
+        }
         Text(
-            text = "Stay hydrated and follow your dietary guidelines for optimal health.",
+            text = qotdText,
             color = PDBuddyTheme.customColors.strongTextColor,
             fontSize = 20.sp,
             fontStyle = FontStyle.Italic,
@@ -173,21 +187,47 @@ fun HomeScreenContent(navController: NavController, username: Result<String?>) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
         // Upcoming Appointment
+        val upcomingAppointmentText = when (userData) {
+            is Result.Idle -> "Loading..."
+            is Result.Loading -> "Loading..."
+            is Result.Success -> {
+                val user = userData.data.firstOrNull()
+                if (user != null) {
+                    val timestamp = user["upcoming_appointment"] as? Timestamp
+                    if (timestamp != null) {
+                        val date = timestamp.toDate()
+                        val formatter = SimpleDateFormat("MMMM dd, yyyy, hh:mm a", Locale.getDefault())
+                        formatter.format(date)
+                    } else {
+                        "No upcoming appointment"
+                    }
+                } else {
+                    "No upcoming appointment"
+                }
+            }
+            is Result.Failure -> "Error, try checking internet connection..."
+
+        }
         SectionCard(
             title = "Upcoming Appointment",
-            content = "Next appointment: June 20, 2024, 10:00 AM",
-            icon = Icons.Default.CalendarToday // Replace with an appropriate icon
+            content = upcomingAppointmentText,
+            icon = Icons.Default.CalendarToday
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Latest Announcement
+        val announcementText = when (announcement) {
+            is Result.Idle -> "Loading..."
+            is Result.Loading -> "Loading..."
+            is Result.Success -> announcement.data
+            is Result.Failure -> "No announcement."
+        }
         SectionCard(
             title = "Latest Announcement",
-            content = "There will be a system maintenance on June 25, 2024.",
-            icon = Icons.AutoMirrored.Filled.Announcement // Replace with an appropriate icon
+            content = announcementText,
+            icon = Icons.AutoMirrored.Filled.Announcement
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -442,12 +482,3 @@ fun ZoomableImage(bitmap: android.graphics.Bitmap) {
 }
 
 data class ProfileItem(val icon: ImageVector, val label: String, val click: () -> Unit)
-
-@Composable
-@Preview(showBackground = true)
-fun HomeScreenPreview() {
-    PDBuddyTheme {
-        val mockNavController = rememberNavController()
-        HomeScreenContent(navController = mockNavController, username = Result.Success("TestUser"))
-    }
-}

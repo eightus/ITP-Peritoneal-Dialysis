@@ -9,21 +9,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import com.itp.pdbuddy.utils.Result
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+) : ViewModel() {
 
-    private val _sampleData = MutableStateFlow<Result<String>>(Result.Idle)
-    val sampleData: StateFlow<Result<String>> = _sampleData.asStateFlow()
+    private val _announcement = MutableStateFlow<Result<String>>(Result.Idle)
+    val announcement: StateFlow<Result<String>> = _announcement.asStateFlow()
 
+    private val _qotd = MutableStateFlow<Result<String>>(Result.Idle)
+    val qotd: StateFlow<Result<String>> = _qotd.asStateFlow()
 
-    fun doTest(sample: String) {
+    fun getQOTD() {
+        _qotd.value = Result.Loading
         viewModelScope.launch {
-            _sampleData.value = Result.Loading
-            delay(3000) // delay 3 second
-            _sampleData.value = Result.Success(sample)
+            _qotd.value = userRepository.getQOTD()
         }
     }
+
+    fun getAnnouncement() {
+        _announcement.value = Result.Loading
+        viewModelScope.launch {
+            _announcement.value = userRepository.getAnnouncement()
+        }
+    }
+
 }
