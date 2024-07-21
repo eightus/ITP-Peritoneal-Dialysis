@@ -7,6 +7,13 @@ import javax.inject.Inject
 class UserRepository @Inject constructor(
     private val userDataSource: UserDataSource
 ) {
+    suspend fun getQOTD(): Result<String> {
+        return userDataSource.getQOTD()
+    }
+
+    suspend fun getAnnouncement(): Result<String> {
+        return userDataSource.getAnnouncement()
+    }
 
     suspend fun getUserInfo(name: String): Result<List<Map<String, Any>>> {
         return userDataSource.getUserInfo(name)
