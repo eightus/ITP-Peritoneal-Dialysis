@@ -370,7 +370,7 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
 //                    }
 //                }
                 OutlinedTextField(
-                    value = if (timeOnSelected.value) timeOn.value else "",
+                    value = if (timeOnSelected.value) formattedTimeOn.value else "",
                     onValueChange = { },
                     label = { Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -422,12 +422,12 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
 //                    }
 //                }
                 OutlinedTextField(
-                    value = if (timeOffSelected.value) timeOff.value else "",
+                    value = if (timeOffSelected.value) formattedTimeOff.value else "",
                     onValueChange = { },
                     label = { Row(
                         verticalAlignment = Alignment.CenterVertically
                     ){
-                        Text("Treatment Start Time")
+                        Text("Treatment End Time")
                     } },
                     modifier = Modifier
                         .fillMaxWidth()
