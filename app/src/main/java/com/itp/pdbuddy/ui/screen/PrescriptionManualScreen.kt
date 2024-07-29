@@ -29,6 +29,7 @@ import com.itp.pdbuddy.utils.navigate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrescriptionManualScreen(navController: NavController) {
     val prescriptionViewModel: PrescriptionViewModel = hiltViewModel()
@@ -90,7 +91,15 @@ fun PrescriptionManualScreen(navController: NavController) {
                     .fillMaxWidth()
                     .clickable { expanded = true },
                 readOnly = true,
-                singleLine = true
+                singleLine = true,
+                enabled = false,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
             )
             DropdownMenu(
                 expanded = expanded,
