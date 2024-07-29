@@ -15,7 +15,7 @@ class ExternalAPIDataSource @Inject constructor(): APIDataSource {
     }
 
     override suspend fun getWeight(): String{
-        return "75"
+        return "71.3"
     }
 
     override suspend fun getTimeOn(): String{

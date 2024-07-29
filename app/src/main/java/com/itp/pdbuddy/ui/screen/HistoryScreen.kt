@@ -100,10 +100,8 @@ fun HistoryItem(
             Text(text = time, fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
         }
     }
-    var scrollDialog = rememberScrollState()
     if (showDialog) {
         AlertDialog(
-            modifier = Modifier.verticalScroll(scrollDialog),
             onDismissRequest = { showDialog = false },
             title = { Text(text = "Details") },
             text = {
