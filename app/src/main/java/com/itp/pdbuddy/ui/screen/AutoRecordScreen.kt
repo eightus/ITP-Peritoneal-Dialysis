@@ -553,7 +553,7 @@ fun AutoRecordScreenContent(navController: NavHostController, username: Result<S
                             whiteBagAmount.value, blueBagDext.value, blueBagAmount.value, blueBagFormatter.value, therapy.value,
                             totalVolume.value, targetUF.value, therapyTime.value, fillVol.value, lastFillVol.value,
                             dextCon.value, cycles.value, initDrain.value, avgDwellTime.value, colorDrain.value,
-                            totalUF.value, nettUF.value, remarks.value)
+                            totalUF.value, nettUF.value, remarks.value), null
                     ) }) {
                         Text(text = "Submit")
                     }

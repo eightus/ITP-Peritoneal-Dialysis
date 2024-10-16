@@ -1,10 +1,12 @@
 package com.itp.pdbuddy.ui.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itp.pdbuddy.data.model.Prescription
 import com.itp.pdbuddy.data.repository.AuthRepository
 import com.itp.pdbuddy.data.repository.RecordRepository
+import com.itp.pdbuddy.service.Base64Service
 import com.itp.pdbuddy.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class RecordViewModel @Inject constructor(
     private val repository: RecordRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val base64Service: Base64Service,
 ): ViewModel() {
 
     private val _recordResult = MutableStateFlow<Result<Boolean>>(Result.Idle)
@@ -32,11 +35,15 @@ class RecordViewModel @Inject constructor(
     private val _latestPrescription = MutableStateFlow<Result<Prescription>>(Result.Idle)
     val latestPrescription: StateFlow<Result<Prescription>> = _latestPrescription.asStateFlow()
 
-
-    fun submitRecord(name: String, data: List<Any>) {
+    fun submitRecord(name: String, data: List<Any>, imageUri: Uri?) {
         _recordResult.value = Result.Loading
         viewModelScope.launch {
-            val result = repository.submitRecord(name, data)
+            // Check if imageUri is provided
+            val base64Image = imageUri?.let { uri ->
+                base64Service.encodeImageToBase64(uri) // Pass context directly
+            }
+
+            val result = repository.submitRecord(name, data, base64Image)
             _recordResult.value = result
         }
     }

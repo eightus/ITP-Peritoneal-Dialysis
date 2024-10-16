@@ -116,6 +116,9 @@ dependencies {
     // Others (I Forgot)
     implementation(libs.androidx.runtime.livedata)
 
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     // Test Implementations
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

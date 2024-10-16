@@ -1,5 +1,9 @@
 package com.itp.pdbuddy.ui.screen
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,6 +66,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -69,11 +76,18 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.itp.pdbuddy.ui.viewmodel.AuthViewModel
 import com.itp.pdbuddy.ui.viewmodel.RecordViewModel
 import com.itp.pdbuddy.utils.Result
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.text.SimpleDateFormat
+import java.util.Base64
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -179,6 +193,20 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
     }
     // Auto calculate treatment hours
     val submitResult by recordViewModel.recordResult.collectAsState()
+
+    // Image Picker
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+    val context = LocalContext.current
+
+
 
     Column {
 
@@ -412,6 +440,27 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                 textNumberBox(title = "Remarks", variable = remarks, numeric = false)
             }
             item{
+
+                Button(onClick = {
+                    launcher.launch("image/*")
+                }) {
+                    Text(text = "Upload Dialysis Fluid Image")
+                }
+                imageUri?.let {
+                    val painter = rememberAsyncImagePainter(
+                        model = ImageRequest.Builder(context)
+                            .data(it)
+                            .build(),
+                        imageLoader = context.imageLoader
+                    )
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        modifier = Modifier.size(200.dp)
+                    )
+                }
+            }
+            item{
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -423,7 +472,7 @@ fun ManualRecordScreenContent(navController: NavController, username: Result<Str
                             whiteBagAmount.value, blueBagDext.value, blueBagAmount.value, blueBagFormatter.value, therapy.value,
                             totalVolume.value, targetUF.value, therapyTime.value, fillVol.value, lastFillVol.value,
                             dextCon.value, cycles.value, initDrain.value, avgDwellTime.value, colorDrain.value,
-                            totalUF.value, nettUF.value, remarks.value)
+                            totalUF.value, nettUF.value, remarks.value), imageUri
                     ) }) {
                         Text(text = "Submit")
                     }
@@ -636,8 +685,6 @@ fun TimePickerDialog(
         }
     }
 }
-
-
 
 @Composable
 fun textNumberBox(

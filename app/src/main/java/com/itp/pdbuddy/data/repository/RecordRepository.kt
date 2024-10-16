@@ -17,8 +17,8 @@ class RecordRepository @Inject constructor(
         return recordDataSource.getRecords(name)
     }
 
-    suspend fun submitRecord(name: String, data: List<Any>): Result<Boolean> {
-        return recordDataSource.submitRecord(name, data)
+    suspend fun submitRecord(name: String, data: List<Any>, base64Image: String?): Result<Boolean> {
+        return recordDataSource.submitRecord(name, data, base64Image)
     }
 
     suspend fun getAutoRecord(): List<Any>{

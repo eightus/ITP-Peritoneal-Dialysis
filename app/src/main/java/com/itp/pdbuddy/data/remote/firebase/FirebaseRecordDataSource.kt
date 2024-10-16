@@ -30,8 +30,7 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource {
         }
     }
 
-    override suspend fun submitRecord(name: String, data: List<Any>): Result<Boolean> {
-        Log.d("Record", data.toString())
+    override suspend fun submitRecord(name: String, data: List<Any>, base64Image: String?): Result<Boolean> {
         return try {
             val record = hashMapOf(
                 "Name" to name,
@@ -64,6 +63,11 @@ class FirebaseRecordDataSource @Inject constructor(): RecordDataSource {
                 "Nett UF" to data[26],
                 "Remarks" to data[27]
             )
+
+            base64Image?.let {
+                record["imageUrl"] = it
+            }
+
             db.collection("Record").document()
                 .set(record)
                 .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully written!") }
